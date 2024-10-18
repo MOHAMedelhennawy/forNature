@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+//  npm install @prisma/client
+//  npx prisma generate
+//  npx prisma migrate dev --name init --create-only
+//  npx prisma migrate deploy
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  image String?
+  username String @unique
+  first_name String
+  last_name String
+  email String @unique
+  password String
+  phone_number Int
+  addresses Address[]
+}
+
+
+model Address {
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user User  @relation(fields: [user_id], references: [id])
+  city City @relation(fields: [city_id], references: [id])
+  user_id String
+  city_id String
+  address_line1 String @db.VarChar(240)
+  address_line2 String @db.VarChar(240)
+  description String
+}
+
+model City {
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  name String @db.VarChar(100)
+  state State @relation(fields: [state_id], references: [id])
+  state_id String
+  address Address[]
+}
+
+model State {
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  name String @db.VarChar(100)
+  postal_code String @db.VarChar(20)
+  cities City[]
+}
