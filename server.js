@@ -5,6 +5,7 @@ import morgan from "morgan";
 import express from 'express';
 import logger from "./utils/logger.js";
 import userRouter from './routes/user.js';
+import authRouter from './routes/auth.js';
 import { PrismaClient } from '@prisma/client';
 import { rateLimit } from 'express-rate-limit'
 
@@ -47,7 +48,7 @@ const limiter = rateLimit({
   
 app.use(limiter)
 app.use('/api/v1/users', userRouter);
-
+app.use('/api/loggin', authRouter);
 // Middleware to disconnect Prisma after each request
 app.use(async (req, res, next) => {
   try {

@@ -1,8 +1,8 @@
 import express from 'express';
-import { userValidator } from '../middleware/userValidator.js';
+import userValidator from '../middleware/userMWValidators.js';
 import { clearData, createData, deleteDataByID, getAllData, getDataByID, updateDataByID } from '../controller/base.js';
 import passowrdHashing from '../middleware/passwordHashing.js';
-
+import { checkUsername, checkEmail } from '../controller/user.js'
 
 const router = express.Router();
 
@@ -35,7 +35,19 @@ router.get('/', async (req, res, next) => {
 // POST => http://localhost:8000/user
 router.post('/', userValidator, passowrdHashing, async (req, res, next) => {
     try {
+        const checkValidUsername = await checkUsername(req.body.username);
+        const checkValidEmail = await checkEmail(req.body.email);
+
+        if (checkValidUsername) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+
+        if (checkValidEmail) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+        console.log("i'm here")
         const user = await createData('user', req.body);
+
         res.status(201).json(user);
     } catch(error) {
         next(error);
