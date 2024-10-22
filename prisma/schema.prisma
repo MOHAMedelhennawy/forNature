@@ -31,6 +31,7 @@ model User {
   password String
   phone_number Int
   addresses Address[]
+  isAdmin Boolean @default(false)
 }
 
 

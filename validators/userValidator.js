@@ -34,6 +34,7 @@ const schema = {
             type: "string"
         },
         phone_number: {type: "integer"},
+        isAdmin: {type: "boolean"}
     },
     required: ["username", "first_name", "last_name", "email", "password", "phone_number"],
     additionalProperties: false,

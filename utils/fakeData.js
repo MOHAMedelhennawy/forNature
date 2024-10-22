@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createData } from './controller/base.js';
+import { createData } from '../controller/base.js';
 
 const data = {
     California: ["Los Angeles", "San Francisco", "San Diego", "Sacramento"],
