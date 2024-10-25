@@ -1,7 +1,10 @@
-import validator from 'validator'
 import Ajv from 'ajv';
+import validator from 'validator'
+import ajvErrors from 'ajv-errors';
 
-const ajv = new Ajv();
+
+const ajv = new Ajv({ allErrors: true, jsonPointers: true });
+ajvErrors(ajv);
 
 ajv.addFormat('email-validator', {
     type: 'string',
@@ -13,11 +16,11 @@ const schema = {
     properties: {
         email: {
             type: "string",
-            format: 'email-validator'
+            format: 'email-validator',
+            errorMessage: 'Invalid email format.',
         },
         password: {
             type: "string",
-            // pattern: '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?/~_+-=|\]).{8,32}$'
         },
     },
     required: ["email", "password"],

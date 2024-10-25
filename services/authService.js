@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt'
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient()
 
@@ -26,13 +27,27 @@ export const checkEmail = async (email) => {
     }
 }
 
-export const generateAuthToken = (user) => {
+export const generateAuthToken = (user, maxAge) => {
     const token = jwt.sign({
         userid: user.id,
         username: user.username,
         first_name: user.first_name,
         last_name: user.last_name,
         isAdmin: user.isAdmin,
-    }, process.env.JWT_SECRET);
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: maxAge }
+    );
     return token;
+}
+
+
+export const checkValidPassword = async (user, password) => {
+    try {
+        const isMatch = await bcrypt.compare(password, user.password);
+        return isMatch;
+    } catch (error) {
+        throw new Error('Error validating the password');
+    }
+
 }

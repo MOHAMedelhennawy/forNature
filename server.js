@@ -4,11 +4,12 @@ import helmet from 'helmet';
 import morgan from "morgan";
 import express from 'express';
 import logger from "./utils/logger.js";
-import userRouter from './routes/user.js';
-import authRouter from './routes/auth.js';
+import cookieParser from 'cookie-parser';
+import userRouter from './routes/userRouter.js';
+import authRouter from './routes/authRouter.js';
 import { PrismaClient } from '@prisma/client';
 import { rateLimit } from 'express-rate-limit'
-
+import errorMiddleware from './middleware/errorMW.js';
 
 const config = dotenv.config();
 const prisma = new PrismaClient()
@@ -16,9 +17,15 @@ const PORT = process.env.PORT || 8000;
 const morganFormat = ":method :url :status :response-time ms";
 
 const app = express();
+
 app.use(cors());
 app.use(helmet());
-app.use(express.json())
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }))    // for handle `x-www-form-urlencoded` requests
+app.use(cookieParser());
+app.use(express.static('public'));
+
+app.set('view engine', 'ejs')
 app.use(
     morgan(morganFormat, {
       stream: {
@@ -47,8 +54,29 @@ const limiter = rateLimit({
 })
   
 app.use(limiter)
+app.use(authRouter);
 app.use('/api/v1/users', userRouter);
-app.use('/api/loggin', authRouter);
+
+
+// app.get('/set-cookies', (req, res, next) => {
+//   res.cookie('isAdmin', 'ture');
+
+//   res.cookie('hasAge', true, {maxAge: 1000 * 60 * 60 * 24});
+//   res.cookie('secured', true, {httpOnly: true})
+//   res.send('You got the cookies');
+// })
+
+// app.get('/get-cookies', (req, res, next) => {
+//   const cookies = req.cookies;
+//   console.log(cookies)
+
+//   res.json(cookies)
+// })
+
+app.get('/', (req, res, next) => {
+  res.render('home')
+})
+
 // Middleware to disconnect Prisma after each request
 app.use(async (req, res, next) => {
   try {
@@ -58,6 +86,8 @@ app.use(async (req, res, next) => {
   }
   next();
 });
+
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
     console.log(`server running now on http://localhost:${PORT}`);

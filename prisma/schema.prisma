@@ -29,7 +29,7 @@ model User {
   last_name String @db.VarChar(20)
   email String @unique
   password String
-  phone_number Int
+  phone_number String
   addresses Address[]
   isAdmin Boolean @default(false)
 }
