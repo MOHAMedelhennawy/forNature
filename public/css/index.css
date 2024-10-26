@@ -1,7 +1,33 @@
 *{
     margin: 0;
     padding: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
     font-style: normal;
     font-family: "DM Serif Text", serif;
 }
+
+/* navbar start */
+.navbar {
+    height: 60px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 5px 2px rgb(74, 144, 46);
+}
+
+.navbar .title {
+    display: flex;
+}
+
+.navbar .title h2::first-letter {
+    color: rgb(74, 144, 46);
+}
+
+ul {
+    display: flex;
+    gap: 18px;
+    list-style: none;
+}
+/* navbar end */

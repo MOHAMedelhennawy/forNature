@@ -6,25 +6,30 @@ form {
     justify-content: center;
     align-items: center;
     /* padding: 50px; */
-    /* background: rgb(178,178,178);
-    background: linear-gradient(38deg, rgba(178,178,178,1) 0%, rgba(127,121,116,1) 1%, rgba(59,74,63,1) 10%, rgba(82,72,62,1) 22%, rgba(124,91,63,1) 50%, rgba(82,72,62,1) 77%, rgba(59,74,63,1) 93%, rgba(118,112,106,1) 99%, rgba(178,178,178,1) 100%);  */
-    background-color: #1e1e1e;
-    background: rgb(178,178,178);
-    background: linear-gradient(135deg, #603813, #b29d5d, #f0e1b1);
-    background: linear-gradient(38deg, rgba(178,178,178,1) 0%, rgba(69,68,68,1) 0%, rgba(30,30,30,1) 51%, rgba(69,68,68,1) 100%, rgba(178,178,178,1) 100%); 
+    background: rgb(250,219,179);
+    background: linear-gradient(38deg, rgba(250,219,179,1) 0%, rgba(111,138,109,1) 100%);
+    background: rgb(255,188,101);
+    background: linear-gradient(38deg, rgba(255,188,101,1) 0%, rgba(246,216,177,1) 43%, rgba(111,138,109,1) 100%); 
+    background: rgb(255,188,101);
+    background: linear-gradient(38deg, rgba(255,188,101,1) 0%, rgba(254,190,107,1) 10%, rgba(246,216,177,1) 29%, rgba(242,214,175,1) 55%, rgba(111,138,109,1) 100%); 
+    background: rgb(255,188,101);
+    background: linear-gradient(38deg, rgba(255,188,101,1) 0%, rgba(254,190,107,1) 9%, rgba(246,216,177,1) 30%, rgba(242,214,175,1) 55%, rgba(111,138,109,1) 100%); 
+    background: linear-gradient(45deg, rgba(223, 204, 173, 1) 0%, rgba(238, 224, 200, 1) 30%, rgba(210, 190, 160, 1) 60%, rgba(150, 140, 120, 1) 100%);
+    background: linear-gradient(38deg, rgba(230, 215, 190, 1) 0%, rgba(210, 190, 170, 1) 50%, rgba(180, 160, 140, 1) 100%);
 
 }
 
 .form-container {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     /* justify-content: center; */
     align-items: center;
-    width: 100%;
     max-width: 1000px;
     min-width: 800px;
-    background-color: antiquewhite;
+    /* background-color: antiquewhite; */
     border-radius: 10px 50px;
+    border: #754d2c 1px solid;
 }
 
 .form-content {
@@ -64,6 +69,9 @@ form {
     font-weight: 500;
 }
 
+.input input:hover {
+    border: 1px solid #b39a84;
+}
 .form-container .image {
     width: 50%;
 }
