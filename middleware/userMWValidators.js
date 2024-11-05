@@ -19,7 +19,7 @@ const userValidatorMiddleware = async (req, res, next) => {
             message: error.message,
         })));
     }
-    
+
     const checkValidEmail = await checkUsername(req.body.email)
     if (checkValidEmail) {
         errors.push({

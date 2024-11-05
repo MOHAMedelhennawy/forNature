@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
             }
-
             this.location.assign('/')
         } catch (err) {
             console.error('Error:', err);

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // User information
     const form = document.querySelector('#signup-form');
     const fnameError = document.querySelector('.first_name.error');
     const lnameError = document.querySelector('.last_name.error');
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log(form)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        // clear previous errors
+
         fnameError.textContent = '';
         lnameError.textContent = '';
         usernameError.textContent = '';
@@ -61,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            this.location.assign('/login')
+            this.location.assign('/');
         } catch (err) {
             console.error('Error:', err);
         }

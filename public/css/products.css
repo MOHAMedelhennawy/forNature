@@ -1,0 +1,139 @@
+.carousel-section {
+    width: 100%;
+    height: 20rem;
+    background-color: antiquewhite;
+}
+
+.product-container {
+    display: flex;
+}
+
+/* Filteration sidebar */
+.sidebar {
+    width: 16%;
+    height: 100vh;
+    /* background-color: red; */
+    transition: all 0.5s ease;
+}
+
+
+/* Filteration sidebar end */
+
+.product-content {
+    width: 84%;
+    height: fit-content;
+    background-color: aqua;
+}
+
+.product-collection {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.product-grid {
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+    margin: auto;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 10px;
+}
+
+.product-item {
+    width: 300px;
+    height: 420px;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.product-image {
+    width: 300px;
+    height: 230px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-top-right-radius: 20px;
+}
+
+.product-information {
+    position: relative;
+    width: 300px;
+    height: 190px;
+    background-color: antiquewhite;
+    border-radius: 0 40% 0 0;
+    padding: 0.8rem;
+}
+/* cart-btn && product-quantity start */
+
+.buttons {
+    width: 90% ;
+    position: absolute;
+    bottom: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-btn, .favorate-btn {
+    border: none;
+    outline: none;
+    background-color: #34343f;
+    color: #fff;
+    height: 40px;
+    border: 50px;
+    font-size: 0.9;
+    cursor: pointer;
+}
+
+.cart-btn {
+    width: 160px;
+    border-radius: 50px;
+}
+
+.product-quantity {
+    width: 160px;
+    height: 40px;
+    display: none;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #34343f;
+    border-radius: 50px;
+}
+
+.product-quantity button{
+    width: 30px;
+    color: #fff;
+    display: flex;
+    border: none;
+    justify-content: center;
+    background-color: #34343f;
+    cursor: pointer;
+}
+
+.product-quantity button i{
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.product-quantity .quantity{
+    font-size: 18px;
+    color: #fff;
+}
+/* cart-btn && product-quantity end */
+.favorate-btn {
+    width: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.checked, .fa-star-half {
+    color: orange;
+}

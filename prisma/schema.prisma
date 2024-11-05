@@ -31,20 +31,21 @@ model User {
   password String
   phone_number String
   addresses Address[]
+  cart Cart?
   isAdmin Boolean @default(false)
 }
 
 
 model Address {
-  id String @id @default(uuid())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id                String @id @default(uuid())
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
   user User  @relation(fields: [user_id], references: [id])
   city City @relation(fields: [city_id], references: [id])
-  user_id String
-  city_id String
-  address_line1 String @db.VarChar(240)
-  address_line2 String @db.VarChar(240)
+  user_id           String
+  city_id           String
+  address_line1     String @db.VarChar(240)
+  address_line2     String @db.VarChar(240)
   description String
 }
 
@@ -59,10 +60,63 @@ model City {
 }
 
 model State {
-  id String @id @default(uuid())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  name String @db.VarChar(100)
-  postal_code String @db.VarChar(20)
+  id             String       @id @default(uuid())
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  name           String       @db.VarChar(100)
+  postal_code    String       @db.VarChar(20)
   cities City[]
+}
+
+model Product {
+  id             String       @id @default(uuid())
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  name           String       @db.VarChar(100)
+  image          String       @db.VarChar(25)
+  category       SubCategory  @relation(fields: [subCategory_id], references: [id])
+  subCategory_id String
+  description    String
+  summary        String
+  price          Decimal
+  quantity       Int
+  cartItem       CartItems[]
+}
+
+model SubCategory {
+  id           String     @id @default(uuid())
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  name         String     @db.VarChar(100)
+  category     Category   @relation(fields: [category_id], references: [id])
+  category_id  String
+  products     Product[]
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  name          String        @db.VarChar(100)
+  description   String
+  subCategories SubCategory[]
+}
+
+model Cart {
+  id            String        @id @default(uuid())
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  user          User          @relation(fields: [user_id], references: [id])
+  user_id       String        @unique
+  total_cost    Decimal       @default(0.0)
+  cartItems     CartItems[]
+}
+
+model CartItems {
+  id            String        @id @default(uuid())
+  cart          Cart          @relation(fields: [cart_id], references: [id])
+  cart_id       String
+  product       Product       @relation(fields: [product_id], references: [id])
+  product_id    String        @unique
+  quantity      Int           
 }

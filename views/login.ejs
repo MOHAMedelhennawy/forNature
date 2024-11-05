@@ -1,4 +1,5 @@
 <%- include('partials/head'); -%>
+<script src="/javascript/login.js"></script>
 
 <form id="login-form" method="POST" action="/login">
     <div class="form-container">
@@ -19,10 +20,10 @@
             <div class="login-btn-holder button input">
                 <button class="login-btn" type="submit">Log in</button>
             </div>
-            <div class="text">Don't have an account <label class="redirect" for="">Sign up</label></div>
+            <div class="text">Don't have an account <a class="redirect" href="/signup">Sign up</a></div>
         </div>
         <div class="image">
-            <img src="images/ryan-riggins-9v7UJS92HYc-unsplash.jpg" alt="">
+            <img src="images/ryan-riggins.jpg" alt="">
         </div>
     </div>
 </form>

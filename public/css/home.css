@@ -16,6 +16,9 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    animation-name: 'home-content';
+    animation-duration: 3s;
+    /* animation-delay: 500ms; */
 }
 
 .home-content h1{
@@ -28,7 +31,6 @@
     /* color: #76330c; */
 }
 .home-content p{
-    
     font-weight: 100;
     font-size: 1.3rem;
     letter-spacing: 4px;
@@ -49,14 +51,14 @@
     text-align: center;
     position: relative;
     transition: all 1s;
-  }
-  
-  .home-content a span{
+}
+
+.home-content a span{
     position: relative;
     z-index: 2;
-  }
-  
-  .home-content a:after{
+}
+
+.home-content a:after{
     position: absolute;
     content: "";
     top: 0;
@@ -65,12 +67,26 @@
     height: 100%;
     background: rgb(74, 144, 46);
     transition: all 1s;
-  }
-  
-  .home-content a:hover{
+}
+
+.home-content a:hover{
     color: #fff;
-  }
-  
-  .home-content a:hover:after{
+}
+
+.home-content a:hover:after{
     width: 100%;
-  }
+}
+
+/* Content animation */
+@keyframes home-content {
+    from {
+        /* height: 80%; */
+        position: relative;
+        right: 35%;
+    }
+    to {
+        position: relative;
+        right: 0;
+        /* height: 100%; */
+    }
+}

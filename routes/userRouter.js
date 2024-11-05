@@ -1,35 +1,35 @@
 import express from 'express';
 import userValidator from '../middleware/userMWValidators.js';
-import authPermission from '../middleware/authMWPermission.js';
+import { requireAuth } from '../middleware/authMWPermission.js';
 import {
-    addNewUserHandler,
-    clearUserDataHandler,
-    deleteUserByIDHandler,
-    getAllUsersHandler,
-    getUserByIDHandler,
-    udpateUserByIDHandler
-} from '../handlers/userHandler.js';
+    addNewUserController,
+    clearUserDataController,
+    deleteUserByIDController,
+    getAllUsersController,
+    getUserByIDController,
+    udpateUserByIDController
+} from '../controller/userController.js';
 
 const router = express.Router();
 
 // GET => http://localhost:8000/user/:id
-router.get('/:id', getUserByIDHandler)
+router.get('/:id', getUserByIDController)
 
 // GET => http://localhost:8000/user
 // GET => http://localhost:8000/user?limit=10
-router.get('/', getAllUsersHandler);
+router.get('/', getAllUsersController);
 
 // POST => http://localhost:8000/user
-// router.post('/', userValidator, authPermission, addNewUserHandler);
+// router.post('/', userValidator, authPermission, addNewUserController);
 
 // PUT => http://localhost:8000/user
-router.put('/:id', authPermission, udpateUserByIDHandler);
+router.put('/:id', requireAuth, udpateUserByIDController);
 
 // DELETE => http://localhost:8000/user
-router.delete('/:id', authPermission, deleteUserByIDHandler);
+router.delete('/:id', requireAuth, deleteUserByIDController);
 
 // to clear all data
-router.delete('/', authPermission, clearUserDataHandler)
+router.delete('/', requireAuth, clearUserDataController)
 
 
 export default router;

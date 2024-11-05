@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient()
 const models = {
@@ -6,9 +6,12 @@ const models = {
     'address': prisma.Address,
     'city': prisma.City,
     'state': prisma.State,
+    'product': prisma.Product,
+    'cart': prisma.Cart,
+    'cartItem': prisma.CartItems,
 }
 
-export const getAllData = async (model, limit) => {
+export const getAllData = async (model, limit = 10) => {
     model = checkModel(model);
 
     try {

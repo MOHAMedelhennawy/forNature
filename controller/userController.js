@@ -1,10 +1,17 @@
 import logger from '../utils/logger.js';
 import { validate as isValidUUID } from 'uuid';
-import { checkUsername, checkEmail, generateAuthToken } from '../services/authService.js'
-import { clearData, createData, deleteDataByID, getAllData, getDataByID, updateDataByID } from '../controller/base.js';
 import hashPassword from '../utils/passwordHashing.js';
+import { checkUsername, checkEmail, generateAuthToken } from '../services/authService.js'
+import {
+    clearData,
+    createData,
+    deleteDataByID,
+    getAllData,
+    getDataByID,
+    updateDataByID
+} from '../services/dataService.js';
 
-export const getUserByIDHandler =  async (req, res, next) => {
+export const getUserByIDController =  async (req, res, next) => {
     const id = req.params.id || null;
 
     if (!id || typeof id !== 'string' || !isValidUUID(id)) {
@@ -25,7 +32,7 @@ export const getUserByIDHandler =  async (req, res, next) => {
 }
 
 
-export const getAllUsersHandler = async (req, res, next) => {
+export const getAllUsersController = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
 
     try {
@@ -41,25 +48,8 @@ export const getAllUsersHandler = async (req, res, next) => {
     }
 }
 
-export const addNewUserHandler = async (req, res, next) => {
+export const addNewUserController = async (req, res, next) => {
     try {
-
-        // const checkValidUsername = await checkUsername(req.body.username);
-        // if (checkValidUsername) {
-        //     return res.status(400).json({
-        //         failed: 'invalid username',
-        //         message: 'username already exist'
-
-        //     });
-        // }
-        
-        // const checkValidEmail = await checkEmail(req.body.email);
-        // if (checkValidEmail) {
-        //     return res.status(400).json({
-        //         failed: 'invalid email',
-        //         message: 'email already exist'
-        //     });
-        // }
 
         const hashedPassword = await hashPassword(req.body.password);
         if (!hashedPassword) {
@@ -75,20 +65,17 @@ export const addNewUserHandler = async (req, res, next) => {
             return res.status(500).json({ message: `Failed to create user` } );
         }
 
-
         const maxAge = 12 * 60 * 60;
         const token = generateAuthToken(user, maxAge);
-        res.cookie('x-auth-token', token, { httpOnly: true, maxAge: maxAge * 1000});
+        res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
         logger.info('User created successfully!')
-        res.status(201).
-            json(user);
-        // header('x-auth-token', token).
+        next();
     } catch(error) {
         next(error);
     }
 }
 
-export const udpateUserByIDHandler = async (req, res, next) => {
+export const udpateUserByIDController = async (req, res, next) => {
     const id = req.params.id;
 
     try {
@@ -105,7 +92,7 @@ export const udpateUserByIDHandler = async (req, res, next) => {
 }
 
 
-export const deleteUserByIDHandler = async (req, res, next) => {
+export const deleteUserByIDController = async (req, res, next) => {
     const id = req.params.id;
 
     try {
@@ -121,7 +108,7 @@ export const deleteUserByIDHandler = async (req, res, next) => {
     }
 }
 
-export const clearUserDataHandler = async (req, res, next) => {
+export const clearUserDataController = async (req, res, next) => {
     if (req.query.clear == 'true') {
         try {
             await clearData('user')

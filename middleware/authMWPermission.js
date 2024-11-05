@@ -1,24 +1,46 @@
 import jwt from 'jsonwebtoken';
+import logger from '../utils/logger.js';
+import { getDataByID } from '../services/dataService.js';
 
-const authPermission = (req, res, next) => {
-    const token = req.header('x-auth-token');
-    
-    if (!token) {
-        return res.status(401).json({ message: 'Access Denied.' });
-    }
+export const requireAuth = (req, res, next) => {
+    const token = req.cookies.authToken;
 
-    try {
-        const decodedPayload = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Ensure the user has admin privileges
-        if (!decodedPayload.isAdmin) {
-            return res.status(403).json({ message: 'Access Denied.' });
-        }
-
-        next();
-    } catch (error) {
-        return res.status(400).json({ message: 'Invalid Token' });
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (error, decodedToken) => {
+            if (error) {
+                logger.error(error.message);
+                res.redirect('/login');
+            } else {
+                logger.info(decodedToken);
+                next();
+            }
+        })
+    } else {
+        res.redirect('/login');
     }
 }
 
-export default authPermission;
+// Check the current user to access from front-end
+export const checkUser = async (req, res, next) => {
+    const token = req.cookies.authToken;
+
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, async (error, decodedToken) => {
+            if (error) {
+                logger.error(error.message);
+                res.locals.user = null;
+                next()
+            } else {
+                console.log(decodedToken);
+                const user = await getDataByID('user', decodedToken.userid);
+                res.locals.user = user;
+                logger.info(`Used id is ${user.id}`)
+                next();
+            }
+        })
+    } else {
+        logger.warn('User is not login');
+        res.locals.user = null;
+        next();
+    }
+}
