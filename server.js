@@ -7,12 +7,14 @@ import logger from "./utils/logger.js";
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter.js';
 import authRouter from './routes/authRouter.js';
-import cartRouter from './routes/cartRouter.js'
+import cartRouter from './routes/cartRouter.js';
+import wishlistRouter from './routes/wishlistRoutes.js';
 import productsRouter from './routes/productsRouter.js'
 import { PrismaClient } from '@prisma/client';
 import { rateLimit } from 'express-rate-limit'
 import errorMiddleware from './middleware/errorMW.js';
 import { checkUser, requireAuth } from './middleware/authMWPermission.js';
+import { checkUserCart } from './middleware/userCartMW.js';
 
 const config = dotenv.config();
 const prisma = new PrismaClient()
@@ -59,13 +61,12 @@ const limiter = rateLimit({
 app.get('*', checkUser);
 app.use(limiter)
 app.use(authRouter);
+// routes
+app.get('/products', (req, res, next) => res.render('products'));
 app.use('/api/v1/users', userRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/cart', cartRouter);
-app.get('/products', (req, res, next) => {
-  res.render('products')
-})
-// routes
+app.use('/api/v1/wishlist', wishlistRouter);
 app.get('/', (req, res, next) => res.render('home'));
 
 // Middleware to disconnect Prisma after each request

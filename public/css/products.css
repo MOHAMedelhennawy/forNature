@@ -1,9 +1,19 @@
 .carousel-section {
     width: 100%;
-    height: 20rem;
-    background-color: antiquewhite;
+    height: 36rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+.carousel-section img{
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+}
 .product-container {
     display: flex;
 }
@@ -14,6 +24,7 @@
     height: 100vh;
     /* background-color: red; */
     transition: all 0.5s ease;
+    border-right: 1px solid rgb(74, 144, 46);
 }
 
 
@@ -22,7 +33,7 @@
 .product-content {
     width: 84%;
     height: fit-content;
-    background-color: aqua;
+    margin-right: 10px;
 }
 
 .product-collection {
@@ -47,14 +58,14 @@
 .product-item {
     width: 300px;
     height: 420px;
-    background-color: black;
-    display: flex;
+    display: none;
     flex-direction: column;
-
+    box-shadow: 0 10px 8px 0 #888;
+    margin-top: 30px;
 }
 
 .product-image {
-    width: 300px;
+    width: 100%;
     height: 230px;
     background-size: cover;
     background-repeat: no-repeat;
@@ -64,9 +75,9 @@
 
 .product-information {
     position: relative;
-    width: 300px;
+    width: 100%;
     height: 190px;
-    background-color: antiquewhite;
+    background-color: aliceblue;
     border-radius: 0 40% 0 0;
     padding: 0.8rem;
 }
@@ -84,7 +95,7 @@
 .cart-btn, .favorate-btn {
     border: none;
     outline: none;
-    background-color: #34343f;
+    background-color: #4dbc84;
     color: #fff;
     height: 40px;
     border: 50px;
@@ -97,7 +108,7 @@
     border-radius: 50px;
 }
 
-.product-quantity {
+.quantity-btn {
     width: 160px;
     height: 40px;
     display: none;
@@ -107,7 +118,7 @@
     border-radius: 50px;
 }
 
-.product-quantity button{
+.quantity-btn button{
     width: 30px;
     color: #fff;
     display: flex;
@@ -117,12 +128,12 @@
     cursor: pointer;
 }
 
-.product-quantity button i{
+.quantity-btn button i{
     font-size: 20px;
     font-weight: 800;
 }
 
-.product-quantity .quantity{
+.quantity-btn .quantity{
     font-size: 18px;
     color: #fff;
 }

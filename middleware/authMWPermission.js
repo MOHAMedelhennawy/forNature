@@ -24,21 +24,20 @@ export const requireAuth = (req, res, next) => {
 export const checkUser = async (req, res, next) => {
     const token = req.cookies.authToken;
 
-    if (token) {
+    if (token) {    // if user is login
         jwt.verify(token, process.env.JWT_SECRET, async (error, decodedToken) => {
             if (error) {
                 logger.error(error.message);
                 res.locals.user = null;
                 next()
             } else {
-                console.log(decodedToken);
                 const user = await getDataByID('user', decodedToken.userid);
                 res.locals.user = user;
-                logger.info(`Used id is ${user.id}`)
+                logger.info(`token is verified, user id is ${decodedToken.userid}`);
                 next();
             }
         })
-    } else {
+    } else {    // if user not login
         logger.warn('User is not login');
         res.locals.user = null;
         next();

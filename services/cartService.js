@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -14,19 +14,30 @@ export const getUserCart = async (user) => {
     }
 }
 
-export const updateCartItem = async (id, quantity) => {
-    if (id) {
-        try {
-            return await prisma.CartItems.update({
-                where: {id: id},
-                data: {
-                    quantity,
-                }
-            })
-        } catch(error) {
-            throw new Error(`Failed to update data: ${error.message}`);
-        }
-    } else {
-        throw new Error(`Id is missing`);
+export const getAllItems = async (cart_id) => {
+
+    try {
+        const data = await prisma.CartItems.findMany({
+            where: {cart_id}
+        });
+        return data;
+    } catch(error) {
+        throw new Error(`Failed to get data: ${error.message}`);
     }
+}
+
+export const changeCartItemQuantity = async (id, quantity) => {
+    if (!id) throw new Error('Id is missing');
+
+    try {
+        return await prisma.CartItems.update({
+            where: {id: id},
+            data: {
+                quantity
+            }
+        })
+    } catch (error) {
+        throw new Error(error.message);
+    }
+
 }
