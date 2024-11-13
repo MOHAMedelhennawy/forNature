@@ -3,13 +3,13 @@ import { createData, deleteDataByID, getAllData, updateDataByID } from "../servi
 import logger from "../utils/logger.js";
 
 export const getAllCartItems = async (req, res, next) => {
-    
     try {
         const cart = res.locals.cart;
         const user = res.locals.user;
 
-        if (cart !== undefined && cart.id) {
+        if (cart && cart.id) {
             const allCartItems = await getAllItems(cart.id);
+
             res.status(200).json(allCartItems);
             logger.info(`Retrieved ${allCartItems.length} items from cart ${cart.id}`);
         } else {
@@ -17,10 +17,11 @@ export const getAllCartItems = async (req, res, next) => {
             logger.info(`Cart is empty for user ${user.id}`);
         }
     } catch (error) {
-        logger.error(`Failed to get cart items => getAllCartItems: ${error.message}`);
+        logger.error(`Failed to get cart items: ${error.message}`);
         next(error);
     }
 };
+
 export const addNewItemToCart = async (req, res, next) => {
     try {
         const cart = res.locals.cart;
@@ -83,7 +84,6 @@ export const deleteCartItem = async (req, res, next) => {
         const cart = res.locals.cart;
         const itemPrice = parseFloat(req.body.price);
 
-        console.log(cart)
         if (!itemPrice) {
             throw new Error("Item price is missing.");
         }

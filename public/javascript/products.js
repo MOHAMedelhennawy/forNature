@@ -14,16 +14,23 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 const renderProducts = async (data) => {
+    let cartItemsResultMap;
+    let wihslistResultMap;
     const productItem = document.querySelector('.product-item');
     const productGrid = document.querySelector('.product-grid');
     productItem.style.display = 'none';
 
     if (data.user) {
         const cartItemsResponse = await fetch('api/cart')
-        const cartItemsResult = await cartItemsResponse.json();
-        
+        cartItemsResult = await cartItemsResponse.json();
+
+        if (Array.isArray(cartItemsResult)){
+            cartItemsResultMap = new Map(cartItemsResult.map(item => [item.product_id, item]));
+        }
+
         const wishlistResponse = await fetch('api/v1/wishlist');
-        const wihslistResult = await wishlistResponse.json();
+        wihslistResult = await wishlistResponse.json();
+        wihslistResultMap = new Map(wihslistResult.map(item => [item.product_id, item]));
     }
 
     for (const product of data.products) {
@@ -36,30 +43,25 @@ const renderProducts = async (data) => {
         newItem.querySelector('.price').textContent = roundTo(product.price, 3);
         newItem.dataset.id = product.id;    // to set id of product on dataset attribute
 
-        if (data.user && cartItemsResult) {
-            for (const item of cartItemsResult) {
-                if (item.product_id === product.id) {
-                    const quantityButton = newItem.querySelector('.quantity-btn');
-                    const cartBtn = newItem.querySelector('.cart-btn');
-                    const currentQuantity = quantityButton.querySelector('.quantity');
-                    newItem.dataset.cartItemId = item.id
+        if (data.user && cartItemsResultMap) {
+            const cartItem = cartItemsResultMap.get(product.id);
+            if (cartItem) {
+                const quantityButton = newItem.querySelector('.quantity-btn');
+                const cartBtn = newItem.querySelector('.cart-btn');
+                const currentQuantity = quantityButton.querySelector('.quantity');
+                newItem.dataset.cartItemId = cartItem.id
 
-                    cartBtn.style.display = 'none';
-                    quantityButton.style.display = 'flex';
-                    currentQuantity.innerText = item.quantity;
-                }
+                cartBtn.style.display = 'none';
+                quantityButton.style.display = 'flex';
+                currentQuantity.innerText = cartItem.quantity;
             }
-
         }
 
-        if (data.user && wihslistResult) {
-            for(const item of wihslistResult) {
-                if (item.product_id === product.id) {
-                    console.log(item.product_id, product.id)
-                    const favourateBtn = newItem.querySelector('.favorate-btn i');
-
-                    favourateBtn.style.color = 'red';
-                }
+        if (data.user && wihslistResultMap) {
+            const wishlistItem = wihslistResultMap.get(product.id);
+            if (wishlistItem) {
+                const favourateBtn = newItem.querySelector('.favorate-btn i');
+                favourateBtn.style.color = 'red';
             }
         }
         productGrid.appendChild(newItem);
@@ -264,7 +266,6 @@ async function updateQuantity(cartItemId, quantityElement, increment, productPri
             headers: { 'Content-Type': 'application/json' }
         });
         
-        console.log(await response.json())
         if (response.ok) {
             quantityElement.innerText = String(currentQuantity);
         } else {

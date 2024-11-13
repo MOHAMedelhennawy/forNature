@@ -26,11 +26,14 @@ export const addNewItemToWishlist = async (req, res, next) => {
 export const getAllWishlistItems = async (req, res, next) => {
     try {
         let wishlistItems;
+        const user_id = req.query.userId || null;
+        const product_id = req.query.productId || null;
 
-        if (req.query.userId && req.query.productId) {
-            wishlistItems = await getWishlistItemByProductIdService(req.query.userId, req.query.productId);
+        if (user_id && product_id) {
+            wishlistItems = await getWishlistItemByProductIdService(user_id, product_id);
         } else {
             const user = res.locals.user;
+
             if (!user.id) res.status(404).json({ error: 'User id is missing' });
     
             wishlistItems = await getWishlistItemsByUserId(user.id);
@@ -38,7 +41,7 @@ export const getAllWishlistItems = async (req, res, next) => {
 
         return res.status(200).json(wishlistItems);
     } catch (error) {
-        logger.error(error.message);
+        logger.error(`Failed to get wihslist items: ${error.message}`);
         next(error);
     }
 }

@@ -1,3 +1,5 @@
+import logger from "../utils/logger.js";
+
 const errorMiddleware = (err, req, res, next) => {
 
     if (err.errors && err.errors.length > 0) {
@@ -8,7 +10,7 @@ const errorMiddleware = (err, req, res, next) => {
         };
       });
       
-      console.log('error: ', err.errors)
+      logger.error(`error: ${err.errors}`)
       return res.status(400).json({
         success: false,
         errors: formattedErrors

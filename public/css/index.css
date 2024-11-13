@@ -9,12 +9,18 @@
 }
 
 /* navbar start */
+.navbar-container {
+    position: fixed;
+    width: 100%;
+    z-index: 3;
+}
 .navbar {
     height: 60px;
     display: flex;
     justify-content: space-around;
     align-items: center;
     box-shadow: 5px 2px rgb(74, 144, 46);
+    background-color: rgb(255, 255, 255);
 }
 
 .navbar .title {
@@ -49,4 +55,19 @@ ul {
     text-decoration: none;
     color: black;
 }
+
+.header-icon li {
+    cursor: pointer;
+}
 /* navbar end */
+
+/* cart start */
+.cart-container {
+    width: 0;
+    height: 100%;
+    background-color: red;
+    position: fixed;
+    right: 0;
+    z-index: 2;
+    transition: all 1s ease;
+}

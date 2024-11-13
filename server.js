@@ -58,11 +58,13 @@ const limiter = rateLimit({
   legacyHeaders: false,
 })
   
-app.get('*', checkUser);
+app.get('*', checkUser, checkUserCart);
 app.use(limiter)
 app.use(authRouter);
 // routes
 app.get('/products', (req, res, next) => res.render('products'));
+app.get('/cart', (req, res, next) => res.render('cart'));
+app.get('/favourate', (req, res, next) => res.render('favourate'));
 app.use('/api/v1/users', userRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/cart', cartRouter);

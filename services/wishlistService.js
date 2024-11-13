@@ -17,7 +17,7 @@ export const getWishlistItemsByUserId = async (user_id) => {
 
 export const getWishlistItemByProductIdService = async (user_id, product_id) => {
     try {
-        const wihslistItem = prisma.wishlist.findUnique({
+        const wihslistItem = prisma.wishlist.findFirst({
             where: {
                 user_id,
                 product_id

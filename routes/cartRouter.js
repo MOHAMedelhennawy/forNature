@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken'
 import express from "express";
 import { checkUser } from '../middleware/authMWPermission.js';
-import { checkUserCart } from '../middleware/userCartMW.js';
+import { checkUserCart, createUserCart } from '../middleware/userCartMW.js';
 import { addNewItemToCart, deleteCartItem, updateCartItem, getAllCartItems } from '../controller/cartController.js';
 import { deleteDataByID } from '../services/dataService.js';
 
 const router = express.Router();
 
-// router.get('/', checkUser, checkUserCart, getAllCartItems)
+router.get('/', getAllCartItems)
 
 /**
  * This router to add a new cart item to user cart when the user
@@ -20,7 +20,7 @@ const router = express.Router();
  * the user cart object on 'res.locals'. otherwise, create new
  * cart.
  */
-router.post('/', checkUser, checkUserCart, addNewItemToCart)
+router.post('/', checkUser, checkUserCart, createUserCart, addNewItemToCart)
 
 router.put('/:id', checkUser, checkUserCart, updateCartItem)
 
