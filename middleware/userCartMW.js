@@ -1,3 +1,4 @@
+import { error } from 'console';
 import { getUserCart } from '../services/cartService.js';
 import { createData } from '../services/dataService.js';
 import logger from '../utils/logger.js';
@@ -7,7 +8,7 @@ export const checkUserCart = async (req, res, next) => {
     try {
         const user = res.locals.user;
         
-        if (!user) next();
+        if (!user) return next()
 
         const userCart = await getUserCart(user);
         if (userCart) {

@@ -61,13 +61,60 @@ ul {
 }
 /* navbar end */
 
-/* cart start */
-.cart-container {
+/* cart start and wishlist */
+.cart-container, .wishlist-container {
     width: 0;
     height: 100%;
-    background-color: red;
+    background-color: rgb(241, 239, 237);
     position: fixed;
     right: 0;
     z-index: 2;
     transition: all 1s ease;
+}
+
+.cart-content, .wishlist-conent{
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: all 3s ease;
+}
+
+.cart-item, .wishlist-item {
+    width: 100%;
+    height: fit-content;
+    display: none;
+    padding: 4px;
+    transition: all 3s ease;
+    box-shadow: 0 2px 5px 0 #888;
+    border-bottom: 5px solid greenyellow;
+}
+
+.cart-img, .wishlist-img {
+    width: 100px;
+    height: 100%;
+}
+.cart-img img, .wishlist-img img {
+    width: 100px;
+    height: 100%;
+}
+
+.cart-info, .wishlist-info {
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-name,
+.cart-summery,
+.wishlist-name,
+.wishlist-summery {
+    margin-left: 6px;
+}
+
+.quantity-btn.cart {
+    display: flex;
+    width: 100px;
 }

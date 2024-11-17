@@ -59,7 +59,7 @@ const limiter = rateLimit({
 })
   
 app.get('*', checkUser, checkUserCart);
-app.use(limiter)
+// app.use(limiter)
 app.use(authRouter);
 // routes
 app.get('/products', (req, res, next) => res.render('products'));

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function () {
     try {
-        const response = await fetch('/api/products');
+        let page = 1, limit = 28;
+        const response = await fetch(`/api/products?page=${page}&limit=${limit}`);  // Get all products
         if (!response.ok) throw new Error('Failed to get products');
 
         const data = await response.json();
@@ -8,31 +9,64 @@ document.addEventListener('DOMContentLoaded', async function () {
             renderProducts(data);
             addEventListeners(data.user);
         }
+
     } catch (error) {
         console.error('Error fetching products:', error);
     }
 });
 
+function pageButtons(pages) {
+    var wrapper = document.querySelector('.pagination-wrapper');
+    
+    
+}
+
+/**
+ * Fetch user cart items and wishlist items.
+ * 
+ * @returns - Return array of arrays, for cart items, wishlist items.
+ *            return null if there no itmes
+ */
+async function fetchCartAndWishlist() {
+    const cartItemsResponse = await fetch('api/cart');
+    const cartItemsResult = await cartItemsResponse.json();
+    const cartItemMap = Array.isArray(cartItemsResult) ? new Map(cartItemsResult.map(item => [item.product_id, item])) : null;
+
+    const wishlistResponse = await fetch('api/v1/wishlist');
+    const wishlistResult = await wishlistResponse.json();
+    const wishlistMap =  Array.isArray(wishlistResult) ? new Map(wishlistResult.map(item => [item.product_id, item])) : null;
+
+    return [cartItemMap, wishlistMap];
+}
+
+/**
+ * Display products
+ *
+ * @param {Object} data - Object of user data and products 
+ */
 const renderProducts = async (data) => {
-    let cartItemsResultMap;
-    let wihslistResultMap;
     const productItem = document.querySelector('.product-item');
     const productGrid = document.querySelector('.product-grid');
     productItem.style.display = 'none';
 
-    if (data.user) {
-        const cartItemsResponse = await fetch('api/cart')
-        cartItemsResult = await cartItemsResponse.json();
-
-        if (Array.isArray(cartItemsResult)){
-            cartItemsResultMap = new Map(cartItemsResult.map(item => [item.product_id, item]));
-        }
-
-        const wishlistResponse = await fetch('api/v1/wishlist');
-        wihslistResult = await wishlistResponse.json();
-        wihslistResultMap = new Map(wihslistResult.map(item => [item.product_id, item]));
+    // Create 10 item of skeleton element
+    for (let i = 0; i < 8; i++) {
+        const skeletonItem = productItem.cloneNode(true);
+        skeletonItem.style.display = 'flex';
+        productGrid.appendChild(skeletonItem);
     }
 
+    // Simulate longer loading time
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    let cartItemMap, wishlistMap;
+    if (data.user) {
+        [cartItemMap, wishlistMap] = await fetchCartAndWishlist();
+    }
+
+    // Clean product-grid to delete skeleton items
+    productGrid.innerHTML = '';
+
+    // Display products
     for (const product of data.products) {
         const newItem = productItem.cloneNode(true);
         newItem.style.display = 'flex';
@@ -41,32 +75,51 @@ const renderProducts = async (data) => {
         newItem.querySelector('.product-name h3').textContent = product.name;
         newItem.querySelector('.product-summery').textContent = product.summary;
         newItem.querySelector('.price').textContent = roundTo(product.price, 3);
-        newItem.dataset.id = product.id;    // to set id of product on dataset attribute
+        newItem.dataset.id = product.id;
 
-        if (data.user && cartItemsResultMap) {
-            const cartItem = cartItemsResultMap.get(product.id);
-            if (cartItem) {
-                const quantityButton = newItem.querySelector('.quantity-btn');
-                const cartBtn = newItem.querySelector('.cart-btn');
-                const currentQuantity = quantityButton.querySelector('.quantity');
-                newItem.dataset.cartItemId = cartItem.id
-
-                cartBtn.style.display = 'none';
-                quantityButton.style.display = 'flex';
-                currentQuantity.innerText = cartItem.quantity;
-            }
+        if (data.user) {
+            toggleCartButton(newItem, cartItemMap, product.id);
+            toggleWishlistButton(newItem, wishlistMap, product.id);
         }
 
-        if (data.user && wihslistResultMap) {
-            const wishlistItem = wihslistResultMap.get(product.id);
-            if (wishlistItem) {
-                const favourateBtn = newItem.querySelector('.favorate-btn i');
-                favourateBtn.style.color = 'red';
-            }
-        }
         productGrid.appendChild(newItem);
+        newItem.classList.remove('skeleton');
+        newItem.querySelectorAll('.skeleton').forEach(el => {
+            el.classList.remove('skeleton')
+            el.classList.remove('skeleton-text')
+        });
     }
 };
+
+/**
+ * 
+ * @param {*} newItem 
+ * @param {*} cartItemMap 
+ * @param {*} productId 
+ */
+function toggleCartButton(newItem, cartItemMap, productId) {
+    const cartItem = cartItemMap.get(productId);
+
+    if (cartItem) {
+        const quantityButton = newItem.querySelector('.quantity-btn');
+        const cartBtn = newItem.querySelector('.cart-btn');
+        const currentQuantity = quantityButton.querySelector('.quantity');
+        newItem.dataset.cartItemId = cartItem.id
+
+        cartBtn.style.display = 'none';
+        quantityButton.style.display = 'flex';
+        currentQuantity.innerText = cartItem.quantity;
+    }
+}
+
+function toggleWishlistButton(newItem, wihslistMap, productId) {
+    const wishlistItem = wihslistMap.get(productId);
+
+    if (wishlistItem) {
+        const favourateBtn = newItem.querySelector('.favorate-btn i');
+        favourateBtn.style.color = 'red';
+    }
+}
 
 async function addEventListeners(user) {
     
@@ -81,34 +134,22 @@ async function addEventListeners(user) {
 
         // Handle adding product to cart, if user click on cartBtn
         if (cartBtn) {
-            const productItem = cartBtn.closest('.product-item');  // Get the closest parent with class "product-item"
-            const productId = productItem.dataset.id;  // Retrieve product ID from data attribute
-
-            if (user) {  // If the user is logged in, add the product to the cart
-                await handleCartButtonClick(productId, cartBtn, productItem);
-            } else {
-                console.error('Please login and try again');
-                window.location.assign('/login');
-            }
+            await handleAction(user, () => handleCartButtonClick(cartBtn));
         } else if (quantityButton) {
-            if (user) {
-                await handleQuantityButtonsClick(quantityButton);
-            } else {
-                console.error('Please login and try again');
-                window.location.assign('/login');
-            }
+            await handleAction(user, () => handleQuantityButtonsClick(quantityButton));
         } else if (favourateBtn) {
-            if (user) {
-                const productItem = favourateBtn.closest('.product-item');
-                const productId = productItem.dataset.id;
-    
-                await handleFavourateButtonClick(productId, user.id, favourateBtn);
-            } else {
-                console.error('Please login and try again');
-                window.location.assign('/login');
-            }
+            await handleAction(user, () => handleFavourateButtonClick(user.id, favourateBtn));
         }
     })
+}
+
+async function handleAction(user, action) {
+    if (user) {
+        await action();
+    } else {
+        console.error('Please login and try again');
+        window.location.assign('/login');
+    }
 }
 
 /**
@@ -121,7 +162,10 @@ async function addEventListeners(user) {
  * @param {UUID} userId - The id of user
  * @param {HTMLElement} favourateBtn - The favourate item element
  */
-async function handleFavourateButtonClick(productId, userId, favourateBtn) {
+async function handleFavourateButtonClick(userId, favourateBtn) {
+    const productItem = favourateBtn.closest('.product-item');
+    const productId = productItem.dataset.id;
+
     const responseGetAllWishlist = await fetch(`/api/v1/wishlist?userId=${userId}&productId=${productId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
@@ -168,14 +212,14 @@ async function handleFavourateButtonClick(productId, userId, favourateBtn) {
  * @param {HTMLElement} quantityButton
  */
 async function handleQuantityButtonsClick(quantityButton) {
-    const productItem = quantityButton.closest('.product-item');
-    const cartBtn = productItem.querySelector('.cart-btn');
-    const quantityElement = productItem.querySelector('.quantity');
+    const targetedItem = quantityButton.closest('.product-item, .cart-item');
+    const cartBtn = targetedItem.querySelector('.cart-btn');
+    const quantityElement = targetedItem.querySelector('.quantity');
     const currentQuantity = parseInt(quantityElement.innerText);  // Current quantity shown
     const increment = quantityButton.classList.contains('increase-quantity') ? 1 : -1;
-    const productPrice = productItem.querySelector('.price').innerText;
+    const productPrice = targetedItem.querySelector('.price').innerText;
     const newQuantity = currentQuantity + increment;  // Calculate new quantity
-    const cartItemId = productItem.dataset.cartItemId;
+    const cartItemId = targetedItem.dataset.cartItemId;
 
     // Only update if the new quantity is 1 or more
     if (newQuantity > 0) {
@@ -195,8 +239,7 @@ async function removeFromCart(cartItemId, cartBtn, quantityElement, productPrice
     })
 
     if (response.ok) {
-        cartBtn.style.display = 'block';
-        quantityElement.parentElement.style.display = 'none';
+        updateQuantityInUI(cartItemId, 0);
     } else {
         console.error('Failed to remove item from cart');
     }
@@ -216,9 +259,10 @@ async function removeFromCart(cartItemId, cartBtn, quantityElement, productPrice
  * @param {HTMLElement} cartBtn - The button that add product to user cart
  * @param {HTMLElement} productItem - The product item element containing the cart and quantity buttons.
  */
-async function handleCartButtonClick(productId, cartBtn, productItem) {
-
+async function handleCartButtonClick(cartBtn) {
+    const productItem = cartBtn.closest('.product-item');  // Get the closest parent with class "product-item"
     const productPrice = productItem.querySelector('.price').innerText;
+    const productId = productItem.dataset.id;  // Retrieve product ID from data attribute
 
     try {
         const response = await fetch('/api/cart', {
@@ -235,6 +279,8 @@ async function handleCartButtonClick(productId, cartBtn, productItem) {
             const quantityButton = productItem.querySelector('.quantity-btn');
             quantityButton.style.display = 'flex';
             productItem.dataset.cartItemId = result.id
+
+            renderUserCart([result]);
         } else {
             console.error('Failed to add product to cart');
         }
@@ -267,12 +313,30 @@ async function updateQuantity(cartItemId, quantityElement, increment, productPri
         });
         
         if (response.ok) {
-            quantityElement.innerText = String(currentQuantity);
+            updateQuantityInUI(cartItemId, currentQuantity);
         } else {
             console.error('Failed to update cart item quantity');
         }
     } catch (error) {
         console.error('Error updating cart item:', error);
+    }
+}
+
+function updateQuantityInUI(cartItemId, newQuantity) {
+    const itemsToUpdate = document.querySelectorAll(`[data-cart-item-id="${cartItemId}"]`);   // get elements with cartItemId from products and cart
+    itemsToUpdate.forEach((element) => {    // loop to update the value
+        element.querySelector('.quantity').innerText = newQuantity;
+    });
+
+    if (newQuantity === 0) {
+        itemsToUpdate.forEach((element) => {
+            if (element.classList.contains('cart-item')) {
+                element.remove();
+            } else if (element.classList.contains('product-item')) {
+                element.querySelector('.quantity-btn').style.display = 'none';
+                element.querySelector('.cart-btn').style.display = 'block';
+            }
+        })
     }
 }
 

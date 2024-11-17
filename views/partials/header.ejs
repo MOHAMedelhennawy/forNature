@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <%- include('head') %>
+<script src="/javascript/header.js"></script>
 <body>
     <div class="navbar-container">
         <nav class="navbar">
@@ -18,7 +19,7 @@
 
             <div class="header-icon">
                 <ul>
-                    <li><a href="/favourate"><i class="material-icons">favorite</i></a></li>
+                    <li class="wishlist-link"><i class="material-icons">favorite</i></li>
                     <li class="cart-link"><a><i class="material-icons">shopping_cart</i></a></li>
                     <% if (user) { %>
                         <li><a href="/logout"><i class="material-icons">logout</i></a></li>
@@ -29,6 +30,35 @@
             </div>
         </nav>
         <div class="cart-container">
-            
+            <div class="cart-content">
+                <div class="cart-item">
+                    <div class="cart-img"><img src="" alt=""></div>
+                    <div class="cart-info">
+                        <h3 class="cart-name"></h3>
+                        <p class="cart-summery"></p>
+                        <span class="price"></span>
+                        <div class="quantity-btn cart">
+                            <button class="decrease-quantity"><i class='bx bx-minus'></i></button>
+                            <span class="quantity"></span>
+                            <button class="increase-quantity"><i class='bx bx-plus'></i></button>
+                        </div>
+                    </div>
+                    <div class="">sdf</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wishlist-container">
+            <div class="wishlist-content">
+                <div class="wishlist-item">
+                    <div class="wishlist-img"><img src="" alt=""></div>
+                    <div class="wishlist-info">
+                        <h3 class="wishlist-name"></h3>
+                        <p class="wishlist-summery"></p>
+                        <span class="price"></span>
+                    </div>
+                    <div class="">sdf</div>
+                </div>
+            </div>
         </div>
     </div>

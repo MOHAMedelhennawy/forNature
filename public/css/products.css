@@ -26,8 +26,6 @@
     transition: all 0.5s ease;
     border-right: 1px solid rgb(74, 144, 46);
 }
-
-
 /* Filteration sidebar end */
 
 .product-content {
@@ -96,19 +94,28 @@
 .cart-btn, .favorate-btn {
     border: none;
     outline: none;
-    background-color: #4dbc84;
     color: #fff;
     height: 40px;
     border: 50px;
-    font-size: 0.9;
+    font-size: 0.9rem;
     cursor: pointer;
 }
 
+.favorate-btn i{
+    transition: all 1s ease;
+    font-size: 35px;
+}
+
 .cart-btn {
+    background-color: #4dbc84;
     width: 160px;
     border-radius: 50px;
 }
 
+.cart-btn:hover {
+    transition: all .4s ease;
+    background-color: #3b8e64;
+}
 .quantity-btn {
     width: 160px;
     height: 40px;
@@ -145,7 +152,39 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: transparent;
 }
 .checked, .fa-star-half {
     color: orange;
 }
+
+/* skeleton loader start */
+.skeleton {
+    animation: skeleton-loading 1s linear infinite alternate;
+  }
+  
+@keyframes skeleton-loading {
+    0% {
+        background-color: hsl(200, 20%, 80%);
+    }
+    100% {
+        background-color: hsl(200, 20%, 95%);
+    }
+}
+
+.fa.skeleton {
+    color: hsl(200, 20%, 95%);
+}
+
+
+.skeleton-text {
+    height: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.product-name.skeleton {
+    width: 35%;
+}
+
+/* skeleton loader end */

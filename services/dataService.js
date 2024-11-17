@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import logger from '../utils/logger.js';
 
 const prisma = new PrismaClient()
@@ -13,11 +13,16 @@ const models = {
     'wishlist': prisma.Wishlist,
 }
 
-export const getAllData = async (model) => {
-    model = checkModel(model);
-
+export const getAllData = async (model, page, limit) => {
     try {
-        const data = await model.findMany();
+        model = checkModel(model);
+
+        const param = (page && limit && !isNaN(page) && !isNaN(limit)) ? {
+            skip: (page - 1) * limit,
+            take: limit
+        } : {};
+        
+        const data = await model.findMany(param);
         return data;
     } catch(error) {
         throw new Error(`Failed to get data: ${error.message}`);

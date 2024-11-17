@@ -7,6 +7,8 @@ export const getAllCartItems = async (req, res, next) => {
         const cart = res.locals.cart;
         const user = res.locals.user;
 
+        // if (!user) return next();
+
         if (cart && cart.id) {
             const allCartItems = await getAllItems(cart.id);
 
