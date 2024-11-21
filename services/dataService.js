@@ -17,12 +17,12 @@ export const getAllData = async (model, page, limit) => {
     try {
         model = checkModel(model);
 
-        const param = (page && limit && !isNaN(page) && !isNaN(limit)) ? {
+        const queryOptions = (page && limit && !isNaN(page) && !isNaN(limit)) ? {
             skip: (page - 1) * limit,
             take: limit
         } : {};
         
-        const data = await model.findMany(param);
+        const data = await model.findMany(queryOptions);
         return data;
     } catch(error) {
         throw new Error(`Failed to get data: ${error.message}`);
@@ -30,8 +30,8 @@ export const getAllData = async (model, page, limit) => {
 }
 
 export const getDataByID = async (model, id) => {
+    
     model = checkModel(model);
-
     if (!id) throw new Error(`Id is missing`);
 
     try {
@@ -101,6 +101,16 @@ export const clearData = async (model) => {
     }
 }
 
+export const getTotalItems = async (model) => {
+    try {
+        model = checkModel(model);
+
+        return await model.count();
+    } catch (error) {
+        next(error);
+    }
+
+}
 const checkModel = (model) => {
     if (!models[model]) {
         throw new Error(`${model} is an invalid model`)

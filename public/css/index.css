@@ -118,3 +118,24 @@ ul {
     display: flex;
     width: 100px;
 }
+
+.cart-container .cart-button {
+    position: relative;
+    bottom: 120px;
+    display: flex;
+    justify-content: center;
+}
+
+.cart-button button{
+    border: none;
+    height: 50px;
+    min-width: 100px;
+    background-color: #4dbc84;
+    color: white;
+    cursor: pointer;
+}
+
+.cart-button button:hover{
+    transition: all 0.5s ease;
+    background-color: #3b8e64;;
+}

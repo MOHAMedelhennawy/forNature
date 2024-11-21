@@ -1,24 +1,81 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    try {
-        let page = 1, limit = 28;
-        const response = await fetch(`/api/products?page=${page}&limit=${limit}`);  // Get all products
-        if (!response.ok) throw new Error('Failed to get products');
-
-        const data = await response.json();
-        if (data && Array.isArray(data.products)) {
-            renderProducts(data);
-            addEventListeners(data.user);
-        }
-
-    } catch (error) {
-        console.error('Error fetching products:', error);
-    }
+    await startProducts();
 });
 
-function pageButtons(pages) {
-    var wrapper = document.querySelector('.pagination-wrapper');
+async function startProducts(page, limit) {
+    const params = new URLSearchParams(window.location.search);
+
+    page = page || params.get('page') || 1;
+    limit = limit || params.get('limit') || 28;
+
+    params.set('page', page);
+    params.set('limit', limit);
+    history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+
+    console.log(`Fetching products for page: ${page}, limit: ${limit}`);
+
+    const data = await fetchProducts(page, limit);
+
+    if (data && Array.isArray(data.products)) {
+        renderProducts(data);
+        addEventListeners(data.user);
+    }
+}
+
+async function fetchProducts(page, limit) {
+    try {
+        const response = await fetch(`/api/products?page=${page}&limit=${limit}`);
+        if (!response.ok) throw new Error('Failed to get products');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching products:', error); 
+    }
+}
+
+function renderPaginationButtons(currentPage, pages) {
+    const pagination = document.querySelector('.pagination-wrapper');
+    pagination.innerHTML = '';
+
+    const createButton = (text, className = '') => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        if (className) button.classList.add(className);
+        return button;
+    };
+
+    if (currentPage > 1) {
+        pagination.appendChild(createButton('Previous', 'previousBtn'));
+    }
+
+    if (currentPage >= 1 && currentPage < 5) {
+        for (let page = 1; page <= 4; page++) {
+            pagination.appendChild(createButton(page));
+        }
+        pagination.appendChild(createButton('...', 'nextDots'));
+        pagination.appendChild(createButton(pages));
+    } 
     
+    else if (currentPage >= 5 && currentPage <= pages - 2) {
+        pagination.appendChild(createButton(1));
+        pagination.appendChild(createButton('...', 'previousDots'));
+        for (let page = currentPage; page < currentPage + 4; page++) {
+            pagination.appendChild(createButton(page));
+        }
+        pagination.appendChild(createButton('...', 'nextDots'));
+        pagination.appendChild(createButton(pages));
+    } 
     
+    else {
+        pagination.appendChild(createButton(1));
+        pagination.appendChild(createButton('...', 'previousDots'));
+        for (let page = currentPage; page <= pages; page++) {
+            pagination.appendChild(createButton(page));
+        }
+    }
+
+    if (currentPage < pages) {
+        pagination.appendChild(createButton('Next', 'nextBtn'));
+    }
 }
 
 /**
@@ -48,11 +105,11 @@ const renderProducts = async (data) => {
     const productItem = document.querySelector('.product-item');
     const productGrid = document.querySelector('.product-grid');
     productItem.style.display = 'none';
+    productGrid.innerHTML = '';
 
     // Create 10 item of skeleton element
     for (let i = 0; i < 8; i++) {
-        const skeletonItem = productItem.cloneNode(true);
-        skeletonItem.style.display = 'flex';
+        const skeletonItem = createSkeletonProductItem();
         productGrid.appendChild(skeletonItem);
     }
 
@@ -89,6 +146,9 @@ const renderProducts = async (data) => {
             el.classList.remove('skeleton-text')
         });
     }
+
+    renderPaginationButtons(data.page, data.pages);
+
 };
 
 /**
@@ -125,13 +185,14 @@ async function addEventListeners(user) {
     
     // Use productGrid for event delegation to handle future dynamically added products
     const productGrid = document.querySelector('.product-grid');
+    const pagination = document.querySelector('.pagination-wrapper');
 
     productGrid.addEventListener('click', async (event) => {
         // event.target: The specific element clicked on by the user
         const cartBtn = event.target.closest('.cart-btn');  // Check if the clicked element or its parent is the cart button
         const quantityButton = event.target.closest('.decrease-quantity, .increase-quantity');  // Check if the clicked element is a quantity button (increase or decrease)
         const favourateBtn = event.target.closest('.favorate-btn');
-
+        // const 
         // Handle adding product to cart, if user click on cartBtn
         if (cartBtn) {
             await handleAction(user, () => handleCartButtonClick(cartBtn));
@@ -141,6 +202,26 @@ async function addEventListeners(user) {
             await handleAction(user, () => handleFavourateButtonClick(user.id, favourateBtn));
         }
     })
+
+    pagination.addEventListener('click', async (event) => {
+        const previousBtn = event.target.closest('.previousBtn');
+        const nextBtn = event.target.closest('.nextBtn');
+        let currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+    
+        if (previousBtn) {
+            currentPage = Math.max(1, currentPage - 1);
+        } else if (nextBtn) {
+            currentPage += 1;
+        } else {
+            currentPage = parseInt(event.target.textContent) || 1;
+        }
+    
+        await startProducts(currentPage);
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+    });
 }
 
 async function handleAction(user, action) {
@@ -206,6 +287,7 @@ async function handleFavourateButtonClick(userId, favourateBtn) {
     }
 
 }
+
 /**
  * This function to handle a click on quntity button
  * 
@@ -342,4 +424,81 @@ function updateQuantityInUI(cartItemId, newQuantity) {
 
 function roundTo(n, decimalPlaces) {
     return +(+(Math.round((n + 'e+' + decimalPlaces)) + 'e-' + decimalPlaces)).toFixed(decimalPlaces);
+}
+
+function createSkeletonProductItem() {
+    const skeletonItem = document.createElement('div');
+    skeletonItem.style.display = 'flex';
+    skeletonItem.classList.add('product-item', 'skeleton');
+
+    const productImage = document.createElement('img');
+    productImage.classList.add('product-image', 'skeleton');
+    productImage.src = '';
+    productImage.alt = '';
+    skeletonItem.appendChild(productImage);
+
+    const productInfo = document.createElement('div');
+    productInfo.classList.add('product-information');
+
+    const productName = document.createElement('div');
+    productName.classList.add('product-name', 'skeleton');
+    const productNameText = document.createElement('h3');
+    productNameText.classList.add('skeleton-text');
+    productName.appendChild(productNameText);
+    productInfo.appendChild(productName);
+
+    const productRating = document.createElement('div');
+    productRating.classList.add('product-rating', 'skeleton');
+    for (let i = 0; i < 5; i++) {
+        const star = document.createElement('span');
+        star.classList.add('fa', 'fa-star', 'checked', 'skeleton');
+        if (i === 4) {
+            star.classList.remove('fa-star');
+            star.classList.add('fa-star-half');
+        }
+        productRating.appendChild(star);
+    }
+    productInfo.appendChild(productRating);
+
+    const productSummary = document.createElement('p');
+    productSummary.classList.add('product-summery', 'skeleton-text');
+    productInfo.appendChild(productSummary);
+
+    const buttons = document.createElement('div');
+    buttons.classList.add('buttons');
+
+    const price = document.createElement('div');
+    price.classList.add('price', 'skeleton-text');
+    buttons.appendChild(price);
+
+    const cartBtn = document.createElement('button');
+    cartBtn.classList.add('cart-btn', 'skeleton');
+    cartBtn.textContent = 'Add to cart';
+    buttons.appendChild(cartBtn);
+
+    const quantityBtn = document.createElement('div');
+    quantityBtn.classList.add('quantity-btn');
+    const decreaseBtn = document.createElement('button');
+    decreaseBtn.classList.add('decrease-quantity');
+    decreaseBtn.innerHTML = "<i class='bx bx-minus'></i>";
+    const quantity = document.createElement('span');
+    quantity.classList.add('quantity', 'skeleton-text');
+    quantity.textContent = '1';
+    const increaseBtn = document.createElement('button');
+    increaseBtn.classList.add('increase-quantity');
+    increaseBtn.innerHTML = "<i class='bx bx-plus'></i>";
+    quantityBtn.appendChild(decreaseBtn);
+    quantityBtn.appendChild(quantity);
+    quantityBtn.appendChild(increaseBtn);
+    buttons.appendChild(quantityBtn);
+
+    const favoriteBtn = document.createElement('button');
+    favoriteBtn.classList.add('favorate-btn', 'skeleton');
+    favoriteBtn.innerHTML = "<i class='material-icons'>favorite</i>";
+    buttons.appendChild(favoriteBtn);
+
+    productInfo.appendChild(buttons);
+    skeletonItem.appendChild(productInfo);
+
+    return skeletonItem;
 }
