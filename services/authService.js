@@ -25,7 +25,7 @@ export const checkEmail = async (email) => {
     }
 }
 
-export const generateAuthToken = (user, maxAge) => {
+export const generateAuthToken = (user, maxAge = 12 * 60 * 60) => {
     const token = jwt.sign({
         userid: user.id,
     },

@@ -11,6 +11,8 @@ const models = {
     'cart': prisma.Cart,
     'cartItem': prisma.CartItems,
     'wishlist': prisma.Wishlist,
+    'order': prisma.order,
+    'orderItem': prisma.OrderItems
 }
 
 export const getAllData = async (model, page, limit) => {

@@ -1,4 +1,4 @@
-import { changeCartItemQuantity, getAllItems } from "../services/cartService.js";
+import { changeCartItemQuantity, deleteAllCartItemsByCartID, getAllItems } from "../services/cartService.js";
 import { createData, deleteDataByID, getAllData, updateDataByID } from "../services/dataService.js";
 import logger from "../utils/logger.js";
 
@@ -7,15 +7,21 @@ export const getAllCartItems = async (req, res, next) => {
         const cart = res.locals.cart;
         const user = res.locals.user;
 
-        // if (!user) return next();
+        if (!user) {
+            logger.warn('User is not authenticated. Skipping cart retrieval.');
+            return res.status(401).json({ message: 'User not authenticated.' });
+        }
 
         if (cart && cart.id) {
             const allCartItems = await getAllItems(cart.id);
 
-            res.status(200).json(allCartItems);
+            res.status(200).json({ allCartItems, cart });
             logger.info(`Retrieved ${allCartItems.length} items from cart ${cart.id}`);
         } else {
-            res.status(200).json({ message: 'Cart is empty', items: [] });
+            res.status(200).json({
+                message: 'Cart is empty',
+                items: []
+            });
             logger.info(`Cart is empty for user ${user.id}`);
         }
     } catch (error) {
@@ -106,3 +112,19 @@ export const deleteCartItem = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const deleteCart = async (req, res, next) => {
+    try {
+        const cart = res.locals.cart || null;
+
+        if (!cart) throw new Error("There no cart to delete");
+        
+        const deletedItems = await deleteAllCartItemsByCartID(cart.id);
+        const deletedCart = await deleteDataByID('cart', cart.id);
+
+        res.status(204).json( {message: 'Cart deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+}

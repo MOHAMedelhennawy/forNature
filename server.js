@@ -8,6 +8,8 @@ import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter.js';
 import authRouter from './routes/authRouter.js';
 import cartRouter from './routes/cartRouter.js';
+import adminRouter from './routes/adminRouter.js'
+import orderRouter from './routes/orderRouter.js';
 import wishlistRouter from './routes/wishlistRoutes.js';
 import productsRouter from './routes/productsRouter.js'
 import { PrismaClient } from '@prisma/client';
@@ -65,10 +67,12 @@ app.use(authRouter);
 app.get('/products', (req, res, next) => res.render('products'));
 app.get('/cart', (req, res, next) => res.render('cart'));
 app.get('/favourate', (req, res, next) => res.render('favourate'));
+app.use('/admin', adminRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/v1/wishlist', wishlistRouter);
+app.use('/api/v1/order', orderRouter);
 app.get('/', (req, res, next) => res.render('home'));
 
 // Middleware to disconnect Prisma after each request

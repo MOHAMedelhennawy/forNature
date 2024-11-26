@@ -26,11 +26,14 @@ export const addNewItemToWishlist = async (req, res, next) => {
 export const getAllWishlistItems = async (req, res, next) => {
     try {
         let wishlistItems;
+        const user = res.locals.user;
         const user_id = req.query.userId || null;
         const product_id = req.query.productId || null;
 
+        if (!user) return next();
+
         if (user_id && product_id) {
-            wishlistItems = await getWishlistItemByProductIdService(user_id, product_id);
+            wishlistItems = await getWishlistItemByProductIdService(user.id, product_id);
         } else {
             const user = res.locals.user;
 
@@ -55,7 +58,7 @@ export const deleteNewItemFromWishlist = async (req, res, next) => {
         const deletedItem = await deleteDataByID('wishlist', id)
         if (deletedItem) {
             logger.info('deleted successfully');
-            res.status(204).json({deletedItem, message: 'deleted successfully'})
+            res.status(200).json({ deletedItem, message: 'deleted successfully' })
         } else {
             logger.error('Something is wrong');
             res.status(404).json({ error: 'Failed to delete wishlist item' });

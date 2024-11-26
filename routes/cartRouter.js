@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken'
 import express from "express";
 import { checkUser } from '../middleware/authMWPermission.js';
 import { checkUserCart, createUserCart } from '../middleware/userCartMW.js';

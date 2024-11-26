@@ -27,9 +27,10 @@ export const getAllItems = async (cart_id) => {
 }
 
 export const changeCartItemQuantity = async (id, quantity) => {
-    if (!id) throw new Error('Id is missing');
-
+    
     try {
+        if (!id) throw new Error('Id is missing');
+
         return await prisma.CartItems.update({
             where: {id: id},
             data: {
@@ -40,4 +41,18 @@ export const changeCartItemQuantity = async (id, quantity) => {
         throw new Error(error.message);
     }
 
+}
+
+export const deleteAllCartItemsByCartID = async (cart_id) => {
+    try {
+        if (!cart_id) throw new Error('Id is missing');
+        
+        return await prisma.CartItems.deleteMany({
+            where: {
+                cart_id
+            }
+        });
+    } catch (error) {
+        throw new Error(`Failed to delete cart items: ${error.message}`);
+    }
 }

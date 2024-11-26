@@ -86,8 +86,8 @@ function renderPaginationButtons(currentPage, pages) {
  */
 async function fetchCartAndWishlist() {
     const cartItemsResponse = await fetch('api/cart');
-    const cartItemsResult = await cartItemsResponse.json();
-    const cartItemMap = Array.isArray(cartItemsResult) ? new Map(cartItemsResult.map(item => [item.product_id, item])) : null;
+    const {allCartItems} = await cartItemsResponse.json();
+    const cartItemMap = Array.isArray(allCartItems) ? new Map(allCartItems.map(item => [item.product_id, item])) : null;
 
     const wishlistResponse = await fetch('api/v1/wishlist');
     const wishlistResult = await wishlistResponse.json();
@@ -104,7 +104,7 @@ async function fetchCartAndWishlist() {
 const renderProducts = async (data) => {
     const productItem = document.querySelector('.product-item');
     const productGrid = document.querySelector('.product-grid');
-    productItem.style.display = 'none';
+    productItem.remove();
     productGrid.innerHTML = '';
 
     // Create 10 item of skeleton element
@@ -158,6 +158,9 @@ const renderProducts = async (data) => {
  * @param {*} productId 
  */
 function toggleCartButton(newItem, cartItemMap, productId) {
+
+    if (!cartItemMap) return;
+
     const cartItem = cartItemMap.get(productId);
 
     if (cartItem) {
@@ -166,18 +169,21 @@ function toggleCartButton(newItem, cartItemMap, productId) {
         const currentQuantity = quantityButton.querySelector('.quantity');
         newItem.dataset.cartItemId = cartItem.id
 
-        cartBtn.style.display = 'none';
+        cartBtn.remove();
         quantityButton.style.display = 'flex';
         currentQuantity.innerText = cartItem.quantity;
     }
 }
 
 function toggleWishlistButton(newItem, wihslistMap, productId) {
-    const wishlistItem = wihslistMap.get(productId);
 
+    if (!wihslistMap) return;
+    const wishlistItem = wihslistMap.get(productId);
+    
     if (wishlistItem) {
         const favourateBtn = newItem.querySelector('.favorate-btn i');
         favourateBtn.style.color = 'red';
+        newItem.dataset.wishlistItemId = wishlistItem.id;
     }
 }
 
@@ -252,12 +258,12 @@ async function handleFavourateButtonClick(userId, favourateBtn) {
         headers: { 'Content-Type': 'application/json' }
     })
 
-    const getAllWishlistResult = await responseGetAllWishlist.json();   // get wishlist item
+    const getWishlistResult = await responseGetAllWishlist.json();   // get wishlist item
 
-    if(!getAllWishlistResult) { // if item not fount, add new item to wishlist
+    if(!getWishlistResult) { // if item not fount, add new item to wishlist
         favourateBtn.querySelector('i').style.color = 'red';
 
-        const responsePostWishlist = await fetch('api/v1/wishlist', {
+        const responsePostWishlist = await fetch('/api/v1/wishlist', {
             method: 'POST',
             body: JSON.stringify({
                 product_id: productId,
@@ -268,26 +274,42 @@ async function handleFavourateButtonClick(userId, favourateBtn) {
 
         if (!responsePostWishlist.ok) {
             console.error('Failed to add item to wishlist');
+        } else {
+            const item = await responsePostWishlist.json();
+            const wishlistContent = document.querySelector('.wishlist-content');
+            const wishlistItemElement = document.querySelector('.wishlist-item');
+            productItem.dataset.wishlistItemId = item.id;
+
+            await addWishlistItemToWihslistUi(item, wishlistContent, wishlistItemElement);
         }
     } else {    // if wishlist is found, delete it from wishlist
-        favourateBtn.querySelector('i').style.color = 'black';
-
-        const responsePostWishlist = await fetch(`api/v1/wishlist/${getAllWishlistResult.id}`, {
-            method: 'DELETE',
-            body: JSON.stringify({
-                product_id: productId,
-                user_id: userId,
-            }),
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!responsePostWishlist.ok) {
-            console.error('Failed to delete item from wishlist');
+        const { deletedItem } = await fetchDeleteWishlistItem(getWishlistResult.id);
+        if (deletedItem) {
+            const wishlistContainer = document.querySelector('.wishlist-container');
+            const item = wishlistContainer.querySelector(`.wishlist-item[data-wishlist-item-id="${deletedItem.id}"]`);
+            item.remove();
+            favourateBtn.querySelector('i').style.color = 'black';
         }
     }
 
 }
+async function fetchDeleteWishlistItem(id) {
+    try {
+        const response = await fetch(`api/v1/wishlist/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
+        if (!response.ok) {
+            throw new Error('Failed to delete item from wishlist');
+        }
+
+        return response.json() || null;
+    } catch (error) {
+        console.error('Error in fetchDeleteWishlistItem:', error);
+        throw error;
+    }
+}
 /**
  * This function to handle a click on quntity button
  * 
@@ -313,7 +335,7 @@ async function handleQuantityButtonsClick(quantityButton) {
     }
 }
 
-async function removeFromCart(cartItemId, cartBtn, quantityElement, productPrice) {
+async function removeFromCart(cartItemId, productPrice) {
     const response = await fetch(`/api/cart/${cartItemId}`, {
         method: 'DELETE',
         body: JSON.stringify({ price: productPrice }),
@@ -357,7 +379,7 @@ async function handleCartButtonClick(cartBtn) {
         console.log(result)
 
         if (response.ok) {
-            cartBtn.style.display = 'none';    
+            cartBtn.remove();
             const quantityButton = productItem.querySelector('.quantity-btn');
             quantityButton.style.display = 'flex';
             productItem.dataset.cartItemId = result.id
@@ -415,7 +437,7 @@ function updateQuantityInUI(cartItemId, newQuantity) {
             if (element.classList.contains('cart-item')) {
                 element.remove();
             } else if (element.classList.contains('product-item')) {
-                element.querySelector('.quantity-btn').style.display = 'none';
+                element.querySelector('.quantity-btn').remove()
                 element.querySelector('.cart-btn').style.display = 'block';
             }
         })

@@ -20,115 +20,144 @@ datasource db {
 
 
 model User {
-  id String @id @default(uuid())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  image String?
-  username String @unique @db.VarChar(20)
-  first_name String @db.VarChar(20)
-  last_name String @db.VarChar(20)
-  email String @unique
-  password String
-  phone_number String
-  addresses Address[]
-  cart Cart?
-  isAdmin Boolean @default(false)
-  wishlist Wishlist[]
+  id                String      @id @default(uuid())
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+  image             String? 
+  username          String      @unique @db.VarChar(20)
+  first_name        String      @db.VarChar(20)
+  last_name         String      @db.VarChar(20)
+  email             String      @unique
+  password          String  
+  phone_number      String  
+  isAdmin           Boolean     @default(false)
+  cart              Cart?
+  order             Order[]
+  addresses         Address[]
+  wishlist          Wishlist[]
 }
 
 
 model Address {
-  id                String @id @default(uuid())
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-  user User  @relation(fields: [user_id], references: [id])
-  city City @relation(fields: [city_id], references: [id])
+  id                String      @id @default(uuid())
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
   user_id           String
   city_id           String
-  address_line1     String @db.VarChar(240)
-  address_line2     String @db.VarChar(240)
-  description String
+  address_line1     String      @db.VarChar(240)
+  address_line2     String      @db.VarChar(240)
+  description       String
+  user              User        @relation(fields: [user_id], references: [id])
+  city              City        @relation(fields: [city_id], references: [id])
 }
 
 model City {
-  id String @id @default(uuid())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  name String @db.VarChar(100)
-  state State @relation(fields: [state_id], references: [id])
-  state_id String
-  address Address[]
+  id                String       @id @default(uuid())
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  name              String       @db.VarChar(100)
+  state_id          String
+  address           Address[]
+  state             State @relation(fields: [state_id], references: [id])
 }
 
 model State {
-  id             String       @id @default(uuid())
-  created_at     DateTime     @default(now())
-  updated_at     DateTime     @updatedAt
-  name           String       @db.VarChar(100)
-  postal_code    String       @db.VarChar(20)
-  cities City[]
+  id                String       @id @default(uuid())
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  name              String       @db.VarChar(100)
+  postal_code       String       @db.VarChar(20)
+  cities            City[]
 }
 
 model Product {
-  id             String       @id @default(uuid())
-  created_at     DateTime     @default(now())
-  updated_at     DateTime     @updatedAt
-  name           String       @db.VarChar(100)
-  image          String       @db.VarChar(25)
-  category       SubCategory  @relation(fields: [subCategory_id], references: [id])
-  subCategory_id String
-  description    String
-  summary        String
-  price          Decimal
-  quantity       Int
-  cartItem       CartItems[]
-  wishlist Wishlist[]
+  id                String       @id @default(uuid())
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  name              String       @db.VarChar(100)
+  image             String       @db.VarChar(25)
+  subCategory_id    String
+  description       String
+  summary           String
+  price             Decimal
+  quantity          Int
+  wishlist          Wishlist[]
+  cartItem          CartItems[]
+  orderItems        OrderItems[]
+  category          SubCategory  @relation(fields: [subCategory_id], references: [id])
 }
 
 model SubCategory {
-  id           String     @id @default(uuid())
-  created_at   DateTime   @default(now())
-  updated_at   DateTime   @updatedAt
-  name         String     @db.VarChar(100)
-  category     Category   @relation(fields: [category_id], references: [id])
-  category_id  String
-  products     Product[]
+  id                String       @id @default(uuid())
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  name              String       @db.VarChar(100)
+  category_id       String
+  products          Product[]
+  category          Category     @relation(fields: [category_id], references: [id])
 }
 
 model Category {
-  id            String        @id @default(uuid())
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
-  name          String        @db.VarChar(100)
-  description   String
-  subCategories SubCategory[]
+  id                String        @id @default(uuid())
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  name              String        @db.VarChar(100)
+  description       String
+  subCategories     SubCategory[]
 }
 
 model Cart {
-  id            String        @id @default(uuid())
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
-  user          User          @relation(fields: [user_id], references: [id])
-  user_id       String        @unique
-  total_cost    Decimal       @default(0.0)
-  cartItems     CartItems[]
+  id                String        @id @default(uuid())
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  user_id           String        @unique
+  total_cost        Decimal       @default(0.0)
+  cartItems         CartItems[]
+  user              User          @relation(fields: [user_id], references: [id])
 }
 
 model CartItems {
-  id            String        @id @default(uuid())
-  cart          Cart          @relation(fields: [cart_id], references: [id])
-  cart_id       String
-  product       Product       @relation(fields: [product_id], references: [id])
-  product_id    String        @unique
-  quantity      Int           
+  id                String        @id @default(uuid())
+  cart_id           String
+  product_id        String
+  quantity          Int           
+  cart              Cart          @relation(fields: [cart_id], references: [id])
+  product           Product       @relation(fields: [product_id], references: [id])
 }
 
 model Wishlist {
-  id            String        @id @default(uuid())
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
-  user          User          @relation(fields: [user_id], references: [id])
-  user_id       String
-  product       Product       @relation(fields: [product_id], references: [id])
-  product_id    String
+  id                String        @id @default(uuid())
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  user_id           String
+  product_id        String
+  user              User          @relation(fields: [user_id], references: [id])
+  product           Product       @relation(fields: [product_id], references: [id])
+}
+
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model Order {
+  id                String        @id @default(uuid())
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  user_id           String
+  total_cost        Decimal
+  orderImtes        OrderItems[]
+  status            OrderStatus   @default(PENDING)
+  user              User          @relation(fields: [user_id], references: [id])
+}
+
+model OrderItems {
+  id                String        @id @default(uuid())
+  order_id          String
+  product_id        String
+  quantity          Int
+  order             Order         @relation(fields: [order_id], references: [id])
+  product           Product       @relation(fields: [product_id], references: [id])
 }

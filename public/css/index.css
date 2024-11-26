@@ -63,9 +63,10 @@ ul {
 
 /* cart start and wishlist */
 .cart-container, .wishlist-container {
+    position: relative;
     width: 0;
     height: 100%;
-    background-color: rgb(241, 239, 237);
+    background-color: white;
     position: fixed;
     right: 0;
     z-index: 2;
@@ -105,13 +106,7 @@ ul {
     margin-left: 5px;
     display: flex;
     flex-direction: column;
-}
-
-.cart-name,
-.cart-summery,
-.wishlist-name,
-.wishlist-summery {
-    margin-left: 6px;
+    padding-left: 1px;
 }
 
 .quantity-btn.cart {
@@ -119,6 +114,12 @@ ul {
     width: 100px;
 }
 
+.cart-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0 0 3px;
+}
 .cart-container .cart-button {
     position: relative;
     bottom: 120px;
@@ -138,4 +139,21 @@ ul {
 .cart-button button:hover{
     transition: all 0.5s ease;
     background-color: #3b8e64;;
+}
+
+.delete-btn.cart {
+    cursor: pointer;
+    font-size: 25px;
+}
+
+.bx.bx-trash {
+    cursor: pointer;
+    color: red;
+}
+
+.delete-wishlist-btn {
+    padding: 0 5px;
+    font-size: 25px;
+    display: flex;
+    align-items: center;
 }
