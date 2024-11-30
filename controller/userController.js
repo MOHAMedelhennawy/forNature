@@ -3,7 +3,6 @@ import { validate as isValidUUID } from 'uuid';
 import hashPassword from '../utils/passwordHashing.js';
 import { checkUsername, checkEmail, generateAuthToken } from '../services/authService.js'
 import {
-    clearData,
     createData,
     deleteDataByID,
     getAllData,
@@ -69,8 +68,12 @@ export const addNewUserController = async (req, res, next) => {
         const token = generateAuthToken(user, maxAge);
         res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
         logger.info('User created successfully!')
-        next();
+        res.status(201).json({
+            message: 'User created successfully!',
+            user
+        });
     } catch(error) {
+        logger.error(error.message)
         next(error);
     }
 }
@@ -105,16 +108,5 @@ export const deleteUserByIDController = async (req, res, next) => {
         res.status(204).json({message: `User deleted successfully.`});
     } catch(error) {
         next(error);
-    }
-}
-
-export const clearUserDataController = async (req, res, next) => {
-    if (req.query.clear == 'true') {
-        try {
-            await clearData('user')
-            res.status(200).json({message: 'Data cleared successfully'})
-        } catch(error) {
-            next(error)
-        }
     }
 }

@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const phoneError = document.querySelector('.phone_number.error');
     
 
-    console.log(form)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -60,9 +59,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
                 }
+            } else {
+                this.location.assign('/');
             }
 
-            this.location.assign('/');
         } catch (err) {
             console.error('Error:', err);
         }

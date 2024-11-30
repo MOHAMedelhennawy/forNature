@@ -10,6 +10,7 @@ import authRouter from './routes/authRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import adminRouter from './routes/adminRouter.js'
 import orderRouter from './routes/orderRouter.js';
+import categoryRouter from './routes/categoryRouter.js';
 import wishlistRouter from './routes/wishlistRoutes.js';
 import productsRouter from './routes/productsRouter.js'
 import { PrismaClient } from '@prisma/client';
@@ -33,6 +34,7 @@ app.use(cookieParser());
 app.use(express.static('public'));
 
 app.set('view engine', 'ejs');
+
 app.use(
   morgan(morganFormat, {
     stream: {
@@ -73,6 +75,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/v1/wishlist', wishlistRouter);
 app.use('/api/v1/order', orderRouter);
+app.use('/api/v1/category', categoryRouter);
 app.get('/', (req, res, next) => res.render('home'));
 
 // Middleware to disconnect Prisma after each request

@@ -3,23 +3,34 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 async function startProducts(page, limit) {
-    const params = new URLSearchParams(window.location.search);
 
-    page = page || params.get('page') || 1;
-    limit = limit || params.get('limit') || 28;
+    const { currentPage, currentLimit } = getPaginationParams(page, limit) ;
 
-    params.set('page', page);
-    params.set('limit', limit);
-    history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    
+    updateURLParams(currentPage, currentLimit);
 
-    console.log(`Fetching products for page: ${page}, limit: ${limit}`);
-
-    const data = await fetchProducts(page, limit);
+    const data = await fetchProducts(currentPage, currentLimit);
 
     if (data && Array.isArray(data.products)) {
         renderProducts(data);
         addEventListeners(data.user);
     }
+}
+
+function updateURLParams(page, limit) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', page);
+    params.set('limit', limit);
+    history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+}
+
+function getPaginationParams(page, limit) {
+    const params = new URLSearchParams(window.location.search);
+
+    const currentPage = page || params.get('page') || 1;
+    const currentLimit = limit || params.get('limit') || 28;
+
+    return { currentPage, currentLimit };
 }
 
 async function fetchProducts(page, limit) {
@@ -104,7 +115,7 @@ async function fetchCartAndWishlist() {
 const renderProducts = async (data) => {
     const productItem = document.querySelector('.product-item');
     const productGrid = document.querySelector('.product-grid');
-    productItem.remove();
+    productItem.style.display = 'none';
     productGrid.innerHTML = '';
 
     // Create 10 item of skeleton element
@@ -169,7 +180,7 @@ function toggleCartButton(newItem, cartItemMap, productId) {
         const currentQuantity = quantityButton.querySelector('.quantity');
         newItem.dataset.cartItemId = cartItem.id
 
-        cartBtn.remove();
+        cartBtn.style.display = 'none';
         quantityButton.style.display = 'flex';
         currentQuantity.innerText = cartItem.quantity;
     }
@@ -287,7 +298,7 @@ async function handleFavourateButtonClick(userId, favourateBtn) {
         if (deletedItem) {
             const wishlistContainer = document.querySelector('.wishlist-container');
             const item = wishlistContainer.querySelector(`.wishlist-item[data-wishlist-item-id="${deletedItem.id}"]`);
-            item.remove();
+            item.style.display = 'none'
             favourateBtn.querySelector('i').style.color = 'black';
         }
     }
@@ -379,7 +390,7 @@ async function handleCartButtonClick(cartBtn) {
         console.log(result)
 
         if (response.ok) {
-            cartBtn.remove();
+            cartBtn.style.display = 'none';    
             const quantityButton = productItem.querySelector('.quantity-btn');
             quantityButton.style.display = 'flex';
             productItem.dataset.cartItemId = result.id
@@ -437,7 +448,7 @@ function updateQuantityInUI(cartItemId, newQuantity) {
             if (element.classList.contains('cart-item')) {
                 element.remove();
             } else if (element.classList.contains('product-item')) {
-                element.querySelector('.quantity-btn').remove()
+                element.querySelector('.quantity-btn').style.display = 'none';
                 element.querySelector('.cart-btn').style.display = 'block';
             }
         })

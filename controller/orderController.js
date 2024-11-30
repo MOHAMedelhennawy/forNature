@@ -1,7 +1,21 @@
 import logger from "../utils/logger.js";
-import { deleteAllOrderItemsByOrderID } from "../services/orderService.js";
+import { deleteAllOrderItemsByOrderID, getOrderWithUserInformation } from "../services/orderService.js";
 import { createData, deleteDataByID, getAllData, getDataByID, updateDataByID } from "../services/dataService.js";
 import { getAllItems } from "../services/cartService.js";
+
+
+export const getOrderById = async (req, res, next) => {
+    try {
+        const id = req.params?.id || null;
+
+        const order = await getOrderWithUserInformation(id);
+        res.status(200).json(order);
+    } catch (error) {
+        logger.error(error.message);
+        next(error);
+    }
+}
+
 
 export const getOrders = async (req, res, next) => {
     try {

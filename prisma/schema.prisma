@@ -74,17 +74,19 @@ model Product {
   id                String       @id @default(uuid())
   created_at        DateTime     @default(now())
   updated_at        DateTime     @updatedAt
-  name              String       @db.VarChar(100)
-  image             String       @db.VarChar(25)
+  name              String       @db.VarChar(50)
+  image             String       @db.VarChar(255)
+  category_id       String
   subCategory_id    String
-  description       String
-  summary           String
+  description       String       @db.VarChar(3000)
+  summary           String       @db.VarChar(200)
   price             Decimal
   quantity          Int
   wishlist          Wishlist[]
   cartItem          CartItems[]
   orderItems        OrderItems[]
-  category          SubCategory  @relation(fields: [subCategory_id], references: [id])
+  category          Category     @relation(fields: [category_id], references: [id])
+  subCategory       SubCategory  @relation(fields: [subCategory_id], references: [id])
 }
 
 model SubCategory {
@@ -103,6 +105,7 @@ model Category {
   updated_at        DateTime      @updatedAt
   name              String        @db.VarChar(100)
   description       String
+  product           Product[]
   subCategories     SubCategory[]
 }
 
@@ -148,7 +151,7 @@ model Order {
   updated_at        DateTime      @updatedAt
   user_id           String
   total_cost        Decimal
-  orderImtes        OrderItems[]
+  orderItems        OrderItems[]
   status            OrderStatus   @default(PENDING)
   user              User          @relation(fields: [user_id], references: [id])
 }

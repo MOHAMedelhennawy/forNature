@@ -37,7 +37,7 @@ export const login_post = async (req, res, next) => {
         logger.info('User logging successfully!')
         res.status(201).json({ message: 'Login successful', user });
     } catch (error) {
-        logger.error('Login failed:', error.message);
+        logger.error(`Login failed: ${error.message}`);
         next(error)
     }
     

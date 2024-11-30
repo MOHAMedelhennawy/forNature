@@ -10,7 +10,7 @@ import validator from '../validators/userValidator.js'
  */
 
 const userValidatorMiddleware = async (req, res, next) => {
-    let errors = [];
+    let errors = []; // [ { field: '', message: '' }, ... ]
     const valid = validator(req.body);
 
     if (!valid) {

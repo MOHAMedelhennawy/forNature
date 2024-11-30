@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import logger from '../utils/logger.js';
 
 const prisma = new PrismaClient()
 const models = {
@@ -23,50 +22,48 @@ export const getAllData = async (model, page, limit) => {
             skip: (page - 1) * limit,
             take: limit
         } : {};
-        
-        const data = await model.findMany(queryOptions);
-        return data;
+
+        return await model.findMany(queryOptions);
     } catch(error) {
         throw new Error(`Failed to get data: ${error.message}`);
     }
 }
 
-export const getDataByID = async (model, id) => {
-    
-    model = checkModel(model);
-    if (!id) throw new Error(`Id is missing`);
-
+export const getDataByID = async (model, id) => {   
     try {
-        const data = await model.findUnique({
+        model = checkModel(model);
+        
+        if (!id) throw new Error(`Id is missing`);
+        
+        return await model.findUnique({
             where: {id}
-        })
-
-        return data;
-    } catch(error) {
+        });
+            } catch(error) {
         throw new Error(`Failed to get data: ${error.message};`)
     }
 }
 
 export const createData = async (model, info) => {
-    model = checkModel(model);
-
+    
     try {
-        const data = await model.create({
+        model = checkModel(model);
+
+        return await model.create({
             data: info
         });
 
-        return data;
     } catch(error) {
         throw new Error(`Failed to create data: ${error.message}`);
     }
 }
 
 export const updateDataByID = async (model, id, info) => {
-    model = checkModel(model);
-
-    if (!id) throw new Error(`Id is missing`);
-
+    
     try {
+        model = checkModel(model);
+    
+        if (!id) throw new Error(`Id is missing`);
+
         return await model.update({
             where: {id},
             data: {
@@ -80,26 +77,15 @@ export const updateDataByID = async (model, id, info) => {
 }
 
 export const deleteDataByID = async (model, id) => {
-    model = checkModel(model);
-
-    if (!id) throw new Error(`Id is missing`);
-
+    
     try {
+        model = checkModel(model);
+
+        if (!id) throw new Error(`Id is missing`);
+
         return await model.delete({ where: {id} })
     } catch(error) {
         throw new Error(`Failed to delete data: ${error.message}`);
-    }
-}
-
-export const clearData = async (model) => {
-    model = checkModel(model);
-    console.log(model)
-    try {
-        await model.deleteMany({});
-        logger.info('Data cleared successfully');
-    } catch (error) {
-        console.error('Error during deletion:', error.message);
-        throw new Error(`Failed to clear data: ${error.message}`);
     }
 }
 
@@ -113,6 +99,7 @@ export const getTotalItems = async (model) => {
     }
 
 }
+
 const checkModel = (model) => {
     if (!models[model]) {
         throw new Error(`${model} is an invalid model`)

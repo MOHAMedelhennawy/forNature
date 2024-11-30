@@ -1,15 +1,19 @@
 import logger from '../utils/logger.js';
-import { getAllData, getDataByID, getTotalItems } from '../services/dataService.js';
+import { createData, getAllData, getDataByID, getTotalItems } from '../services/dataService.js';
+import { getAllProductsData } from '../services/productService.js';
 
 export const getAllProducts = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 28;
+        const category = req.query.category || null;
+        const subCategory = req.query.subCategory || null;
         const user = res.locals.user || null;
 
         const totalItems = await getTotalItems('product');
-        const products = await getAllData('product', page, limit);
+        const products = await getAllProductsData(page, limit, category, subCategory);
 
+        console.log(products)
         res.status(200).json({
             products,
             user,
@@ -19,6 +23,8 @@ export const getAllProducts = async (req, res, next) => {
             pages: Math.ceil(totalItems / limit),
 
         });
+
+
     } catch (error) {
         logger.error("Error fetching products:", error.message);
         next(error);
@@ -36,6 +42,24 @@ export const getProductById = async (req, res, next) => {
 
         res.status(200).json(product);
     } catch (error) {
+        next(error);
+    }
+}
+
+export const addNewProduct = async (req, res, next) => {
+    try {
+        req.body.image = req.file.filename;
+        req.body.price = parseFloat(req.body.price)
+        req.body.quantity = parseInt(req.body.quantity)
+        
+        const newProduct = await createData('product', req.body);
+        logger.info('Product added successfully!');
+        res.status(200).json({
+            message: 'Product added successfull!',
+            newProduct
+        })
+    } catch (error) {
+        logger.error(error.message)
         next(error);
     }
 }

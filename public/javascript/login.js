@@ -33,8 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
                 }
+            } else {
+                this.location.assign('/')
             }
-            this.location.assign('/')
         } catch (err) {
             console.error('Error:', err);
         }

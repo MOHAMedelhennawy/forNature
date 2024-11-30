@@ -1,9 +1,6 @@
 import express from 'express';
-import userValidator from '../middleware/userMWValidators.js';
 import { requireAuth } from '../middleware/authMWPermission.js';
 import {
-    addNewUserController,
-    clearUserDataController,
     deleteUserByIDController,
     getAllUsersController,
     getUserByIDController,
@@ -29,7 +26,7 @@ router.put('/:id', requireAuth, udpateUserByIDController);
 router.delete('/:id', requireAuth, deleteUserByIDController);
 
 // to clear all data
-router.delete('/', requireAuth, clearUserDataController)
+// router.delete('/', requireAuth, clearUserDataController)
 
 
 export default router;
