@@ -3,7 +3,7 @@ import logger from '../utils/logger.js';
 
 const prisma = new PrismaClient()
 
-export const getAllProductsData = async (page, limit, categoryQuery, subCategoryQuery) => {
+export const getAllProductsData = async (page, limit, categoryQuery, subCategoryQuery, minPrice, maxPrice) => {
     try {
 
         const queryOptions = (page && limit && !isNaN(page) && !isNaN(limit)) ? {
@@ -13,10 +13,8 @@ export const getAllProductsData = async (page, limit, categoryQuery, subCategory
 
         if (categoryQuery) {
             // convert category string to array
-            // Ex: [Bedroom,Dining,Kitchen] => [ 'Bedroom', 'Dining', 'Kitchen' ]
-            // OR: Bedroom => [ 'Bedroom' ]
-            const categoryList = categoryQuery.replace(/[\[\]]/g, '').split(',');
-            console.log(categoryList)
+            // Ex: Bedroom,Dining,Kitchen => [ 'Bedroom', 'Dining', 'Kitchen' ]
+            const categoryList = categoryQuery.split(',');
             queryOptions.where = {
                 category: {
                     name: { in: categoryList }
@@ -29,7 +27,7 @@ export const getAllProductsData = async (page, limit, categoryQuery, subCategory
         }
 
         if (subCategoryQuery) {
-            const subCategoryList = subCategoryQuery.replace(/[\[\]]/g, '').split(',');
+            const subCategoryList = subCategoryQuery.split(',');
 
             queryOptions.where = {
                 OR: [
@@ -50,7 +48,23 @@ export const getAllProductsData = async (page, limit, categoryQuery, subCategory
             }
         }
 
-        return await prisma.Product.findMany(queryOptions);
+        if (minPrice && maxPrice) {
+            queryOptions.where = {
+                price: {
+                    gt: minPrice,
+                    lt: maxPrice
+                },
+                ...queryOptions.where,
+            }
+        }
+
+        const data = await prisma.Product.findMany(queryOptions);
+        const total = await prisma.Product.count({
+            where: queryOptions.where,
+        });
+
+        console.log(queryOptions)
+        return { data, total };
     } catch(error) {
         logger.error(`Failed to get data: ${error.message}`);
         throw new Error(`Failed to get data: ${error.message}`);

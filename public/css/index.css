@@ -31,7 +31,7 @@
     color: rgb(74, 144, 46);
 }
 
-ul {
+.navbar ul {
     display: flex;
     gap: 18px;
     list-style: none;

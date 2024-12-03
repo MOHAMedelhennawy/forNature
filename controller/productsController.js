@@ -6,16 +6,17 @@ export const getAllProducts = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 28;
-        const category = req.query.category || null;
-        const subCategory = req.query.subCategory || null;
+        const categories = req.query.categories || null;
+        const subCategories = req.query.subCategories || null;
+        const minPrice = req.query.minPrice || 0;
+        const maxPrice = req.query.maxPrice || 1000;
         const user = res.locals.user || null;
 
-        const totalItems = await getTotalItems('product');
-        const products = await getAllProductsData(page, limit, category, subCategory);
+        const products = await getAllProductsData(page, limit, categories, subCategories, minPrice, maxPrice);
+        const totalItems = products.total;
 
-        console.log(products)
         res.status(200).json({
-            products,
+            products: products.data,
             user,
             page,
             limit,

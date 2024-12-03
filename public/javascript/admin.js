@@ -1,3 +1,5 @@
+import { fetchCategories } from 'javascript/api/category.js';
+
 document.addEventListener('DOMContentLoaded', async _ => {
     const orders = await fetchOrders();
 
@@ -355,18 +357,5 @@ async function fetchOrder(id) {
         return await response.json();
     } catch (error) {
         console.log(error);
-    }
-}
-async function fetchCategories() {
-    try {
-        const response = await fetch(`/api/v1/category`);
-
-        if (!response.ok) {
-            console.error('Failed to fetch category');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error(error);
     }
 }

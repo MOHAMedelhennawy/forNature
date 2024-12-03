@@ -3,8 +3,49 @@
 <div class="product-container">
 
     <!-- Filterations sidebar start -->
-    <div class="sidebar">
-                
+    <div class="sidebar-container">
+        <div class="sidebar-content">
+            <form class="filteration-form" action="">
+                <ul>
+                    <li>
+                        <div class="filteration-header">
+                            <i class='bx bxs-chevron-down'></i>
+                            <span>Category</span>
+                        </div>
+                        <ul class="category list-content hidden">
+                            <li>
+                                <ul class="subCategory list-content"></ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="price-header">
+                            <i class='bx bxs-chevron-down'></i>
+                            <span>Price</span>
+                        </div>
+                        <ul class="price-filter hidden">
+                            <div class="range_container">
+                                <div class="sliders_control">
+                                    <input id="fromSlider" type="range" value="10" min="0" max="1000"/>
+                                    <input id="toSlider" type="range" value="40" min="0" max="1000"/>
+                                </div>
+                                <div class="form_control">
+                                    <div class="form_control_container">
+                                        <div class="form_control_container__time">Min</div>
+                                        <input class="form_control_container__time__input" type="number" id="fromInput" value="10" min="0" max="1000"/>
+                                    </div>
+                                    <div class="form_control_container">
+                                        <div class="form_control_container__time">Max</div>
+                                        <input class="form_control_container__time__input" type="number" id="toInput" value="40" min="0" max="1000"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </ul>
+                    </li>
+                </ul>
+                <input type="submit">
+            </form>
+        </div>
     </div>
     <!-- Filterations sidebar end -->
 
@@ -48,4 +89,5 @@
     </div>
     
 </div>
-<script src="/javascript/products.js"></script>
+<script type="module" src="/javascript/products.js"></script>
+<script type="module" src="/javascript/components/filter.js"></script>

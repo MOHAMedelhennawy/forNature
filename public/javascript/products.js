@@ -1,15 +1,22 @@
+import { 
+    getPaginationParams,
+    renderPaginationButtons,
+    chageCurrentPage
+} from '/javascript/components/pagination.js';
+
+import { getSelectedFilters, renderFilter, updateURLFilters, getFilterParams } from '/javascript/components/filter.js'
+
 document.addEventListener('DOMContentLoaded', async function () {
     await startProducts();
+    await renderFilter();
 });
 
-async function startProducts(page, limit) {
-
-    const { currentPage, currentLimit } = getPaginationParams(page, limit) ;
-
-    
+async function startProducts(page, limit, filters = {}) {
+    const { currentPage, currentLimit } = getPaginationParams(page, limit);
+    filters = getFilterParams(filters);
     updateURLParams(currentPage, currentLimit);
 
-    const data = await fetchProducts(currentPage, currentLimit);
+    const data = await fetchProducts(currentPage, currentLimit, filters);
 
     if (data && Array.isArray(data.products)) {
         renderProducts(data);
@@ -24,70 +31,41 @@ function updateURLParams(page, limit) {
     history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
 }
 
-function getPaginationParams(page, limit) {
-    const params = new URLSearchParams(window.location.search);
-
-    const currentPage = page || params.get('page') || 1;
-    const currentLimit = limit || params.get('limit') || 28;
-
-    return { currentPage, currentLimit };
-}
-
-async function fetchProducts(page, limit) {
+async function fetchProducts(page, limit, filters = {}) {
     try {
-        const response = await fetch(`/api/products?page=${page}&limit=${limit}`);
+        // Construct the URL with pagination and filter parameters
+        const url = new URL('/api/products', window.location.origin);
+        url.searchParams.set('page', page);
+        url.searchParams.set('limit', limit);
+
+        // Add categories filter if present
+        if (filters.categories && filters.categories.length > 0) {
+            url.searchParams.set('categories', filters.categories.join(','));
+        }
+
+        // Add subCategories filter if present
+        if (filters.subCategories && filters.subCategories.length > 0) {
+            url.searchParams.set('subCategories', filters.subCategories.join(','));
+        }
+
+        if (filters.minPrice) {
+            url.searchParams.set('minPrice', filters.minPrice);
+        }
+
+        if (filters.maxPrice) {
+            url.searchParams.set('maxPrice', filters.maxPrice);
+        }
+
+        const response = await fetch(url.toString());
+
         if (!response.ok) throw new Error('Failed to get products');
+
         return await response.json();
     } catch (error) {
-        console.error('Error fetching products:', error); 
+        console.error('Error fetching products:', error);
     }
 }
 
-function renderPaginationButtons(currentPage, pages) {
-    const pagination = document.querySelector('.pagination-wrapper');
-    pagination.innerHTML = '';
-
-    const createButton = (text, className = '') => {
-        const button = document.createElement('button');
-        button.textContent = text;
-        if (className) button.classList.add(className);
-        return button;
-    };
-
-    if (currentPage > 1) {
-        pagination.appendChild(createButton('Previous', 'previousBtn'));
-    }
-
-    if (currentPage >= 1 && currentPage < 5) {
-        for (let page = 1; page <= 4; page++) {
-            pagination.appendChild(createButton(page));
-        }
-        pagination.appendChild(createButton('...', 'nextDots'));
-        pagination.appendChild(createButton(pages));
-    } 
-    
-    else if (currentPage >= 5 && currentPage <= pages - 2) {
-        pagination.appendChild(createButton(1));
-        pagination.appendChild(createButton('...', 'previousDots'));
-        for (let page = currentPage; page < currentPage + 4; page++) {
-            pagination.appendChild(createButton(page));
-        }
-        pagination.appendChild(createButton('...', 'nextDots'));
-        pagination.appendChild(createButton(pages));
-    } 
-    
-    else {
-        pagination.appendChild(createButton(1));
-        pagination.appendChild(createButton('...', 'previousDots'));
-        for (let page = currentPage; page <= pages; page++) {
-            pagination.appendChild(createButton(page));
-        }
-    }
-
-    if (currentPage < pages) {
-        pagination.appendChild(createButton('Next', 'nextBtn'));
-    }
-}
 
 /**
  * Fetch user cart items and wishlist items.
@@ -203,6 +181,7 @@ async function addEventListeners(user) {
     // Use productGrid for event delegation to handle future dynamically added products
     const productGrid = document.querySelector('.product-grid');
     const pagination = document.querySelector('.pagination-wrapper');
+    const filetrationForm = document.querySelector('.filteration-form');
 
     productGrid.addEventListener('click', async (event) => {
         // event.target: The specific element clicked on by the user
@@ -239,6 +218,16 @@ async function addEventListeners(user) {
             behavior: 'smooth',
         });
     });
+
+    filetrationForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const { categories, subCategories } = getSelectedFilters(filetrationForm);
+        const minPrice = document.getElementById('fromInput').value;
+        const maxPrice = document.getElementById('toInput').value;
+
+        updateURLFilters(categories, subCategories, minPrice, maxPrice);
+        await startProducts(1, 28, { categories, subCategories, minPrice, maxPrice });
+    })
 }
 
 async function handleAction(user, action) {
