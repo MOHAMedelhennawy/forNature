@@ -20,8 +20,9 @@ const userValidatorMiddleware = async (req, res, next) => {
         })));
     }
 
-    const checkValidEmail = await checkUsername(req.body.email)
+    const checkValidEmail = await checkEmail(req.body.email)
     if (checkValidEmail) {
+        logger.error('Email already exist');
         errors.push({
             field: 'email',
             message: 'Email Already Exist'
@@ -30,6 +31,7 @@ const userValidatorMiddleware = async (req, res, next) => {
 
     const checkValidUsername = await checkUsername(req.body.username);
     if (checkValidUsername) {
+        logger.error('Username already exist');
         errors.push({
             field: 'username',
             message: 'Username Already Exist'

@@ -19,6 +19,8 @@ import errorMiddleware from './middleware/errorMW.js';
 import { checkUser, requireAuth } from './middleware/authMWPermission.js';
 import { checkUserCart } from './middleware/userCartMW.js';
 
+import './config/passport-config.js';
+
 const config = dotenv.config();
 const prisma = new PrismaClient()
 const PORT = process.env.PORT || 8000;

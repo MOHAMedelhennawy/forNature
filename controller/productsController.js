@@ -8,8 +8,8 @@ export const getAllProducts = async (req, res, next) => {
         const limit = parseInt(req.query.limit) || 28;
         const categories = req.query.categories || null;
         const subCategories = req.query.subCategories || null;
-        const minPrice = req.query.minPrice || 0;
-        const maxPrice = req.query.maxPrice || 1000;
+        const minPrice = req.query.minPrice || null;
+        const maxPrice = req.query.maxPrice || null;
         const user = res.locals.user || null;
 
         const products = await getAllProductsData(page, limit, categories, subCategories, minPrice, maxPrice);

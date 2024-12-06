@@ -66,8 +66,11 @@ export const addNewUserController = async (req, res, next) => {
 
         const maxAge = 12 * 60 * 60;
         const token = generateAuthToken(user, maxAge);
+
         res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
+
         logger.info('User created successfully!')
+
         res.status(201).json({
             message: 'User created successfully!',
             user

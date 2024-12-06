@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'
+import logger from "../utils/logger.js";
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient()
 
@@ -10,18 +11,19 @@ export const checkUsername = async (username) => {
         })
         return user;
     } catch(error) {
-        next(error);
+        throw new Error(error.message)
     }
 }
 
 export const checkEmail = async (email) => {
     try {
+        logger.info('Email is checked successfully!');
         const user = await prisma.user.findUnique({
             where: {email}
         })
         return user;
     } catch(error) {
-        next(error);
+        throw new Error(error.message)
     }
 }
 
@@ -41,7 +43,7 @@ export const checkValidPassword = async (user, password) => {
         const isMatch = await bcrypt.compare(password, user.password);
         return isMatch;
     } catch (error) {
-        next(error);
+        throw new Error(error.message)
     }
 
 }
