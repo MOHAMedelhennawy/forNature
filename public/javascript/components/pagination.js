@@ -59,7 +59,6 @@ export function renderPaginationButtons(currentPage, totalPages) {
     }
 }
 
-
 export async function chageCurrentPage(event, startProducts) {
     const previousBtn = event.target.closest('.previousBtn');
         const nextBtn = event.target.closest('.nextBtn');

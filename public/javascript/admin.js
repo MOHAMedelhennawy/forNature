@@ -1,10 +1,10 @@
-import { fetchCategories } from 'javascript/api/category.js';
+import { fetchCategories } from '/javascript/api/category.js';
 
 document.addEventListener('DOMContentLoaded', async _ => {
     const orders = await fetchOrders();
 
     await renderOrders(orders);
-    adminEventListeners();
+    adminEventListeners(orders);
 })
 
 async function renderOrders(orders) {
@@ -12,6 +12,10 @@ async function renderOrders(orders) {
 
     // Clear existing rows
     tbody.innerHTML = '';
+
+    if (orders < 0 && !Array.isArray(orders)) {
+        return;
+    }
 
     orders.forEach(order => {
         const row = document.createElement('tr');
@@ -146,20 +150,22 @@ async function fetchOrders() {
     }
 }
 
-function adminEventListeners() {
+function adminEventListeners(orders) {
     const addProductBtn = document.querySelector('.add-product.btn');
     const closePopupButton = document.getElementById('closePopup');
     const popup = document.getElementById('popup');
     const popupOverlay = document.getElementById('popup-overlay');
     const viewButton = document.querySelector(`.btn-view-details`);
 
-    
-    // Open order popup
-    viewButton.addEventListener('click', (event) => {
-        const order_id = event.target.closest('tr').id;
 
-        openPopupWindow(popup, popupOverlay, order_id, viewDetails)
-    })
+    // Open order popup
+    if (orders.length > 0 && Array.isArray(orders)) {
+        viewButton.addEventListener('click', (event) => {
+            const order_id = event.target.closest('tr').id;
+    
+            openPopupWindow(popup, popupOverlay, order_id, viewDetails)
+        })
+    }
 
     // Open product popup
     addProductBtn.addEventListener('click', () => openPopupWindow(popup, popupOverlay, null, renderProductForm));
@@ -169,7 +175,6 @@ function adminEventListeners() {
 
     // Close popup by clicking outside
     popupOverlay.addEventListener('click', () => closePopupWindow(popup, popupOverlay));
-
 }
 
 // View Details Function

@@ -1,3 +1,12 @@
+import {
+    fetchCartItems,
+    fetchWishlistItems,
+    fetchDeleteWishlistItem,
+} from '/javascript/api/category.js'
+
+import { renderWishlistItems } from '/javascript/components/wishlist.js';
+import { renderUserCart, handleQuantityButtonsClick, removeFromCart} from '/javascript/components/cart.js';
+
 document.addEventListener('DOMContentLoaded', async function () {
 
     const { allCartItems, cart } = await fetchCartItems();
@@ -96,84 +105,4 @@ async function addEventListeners2(cart) {
             }
         }
     })
-}
-
-async function fetchCartItems() {
-    const response = await fetch('/api/cart');
-
-    return response.ok ? await response.json() : [];
-}
-
-async function fetchWishlistItems() {
-    const response = await fetch('/api/v1/wishlist');
-
-    return response.ok ? await response.json() : [];
-}
-
-async function fetchProductById(id) {
-    const response = await fetch(`/api/products/${id}`);
-
-    if (!response.ok) console.error(`Failed to get product with ${id}`);
-
-    return response.json();
-}
-
-async function renderUserCart(userCartItems) {
-    const cartContent = document.querySelector('.cart-content');
-    const cartItemElement = cartContent.querySelector('.cart-item');
-
-    if (Array.isArray(userCartItems)) {
-        for (const item of userCartItems) {
-            await addCartItemsToCartInUi(item, cartContent, cartItemElement);
-        }
-    }
-}
-
-async function renderWishlistItems(wishlistItems) {
-    const wishlistContent = document.querySelector('.wishlist-content');
-    const wishlistItemElement = document.querySelector('.wishlist-item');
-
-    for (const item of wishlistItems) {
-        if (Array.isArray(wishlistItems)) {
-            await addWishlistItemToWihslistUi(item, wishlistContent, wishlistItemElement);
-        }
-    }
-}
-
-async function addCartItemsToCartInUi(item, cartContent, cartItemElement) {
-    const newCartItem = cartItemElement.cloneNode(true);
-    const cartImg = newCartItem.querySelector('.cart-img img');
-    const cartName = newCartItem.querySelector('.cart-name');
-    const cartSummery = newCartItem.querySelector('.cart-summery');
-    const cartQuantity = newCartItem.querySelector('.quantity-btn.cart .quantity');
-    const cartPrice = newCartItem.querySelector('.price');
-    const product = await fetchProductById(item.product_id);
-    newCartItem.dataset.cartItemId = item.id;
-
-    cartImg.src = `images/${product.image}`;
-    cartName.innerText = product.name;
-    cartSummery.innerText = product.summary;
-    cartQuantity.innerText = item.quantity;
-    cartPrice.innerText = product.price;
-    newCartItem.style.display = 'flex';
-
-    cartContent.appendChild(newCartItem);
-}
-
-async function addWishlistItemToWihslistUi(item, wishlistContent, wishlistItemElement) {
-    const newWishlistItem = wishlistItemElement.cloneNode(true);
-    const wishlistImg = newWishlistItem.querySelector('.wishlist-img img');
-    const wishlistName = newWishlistItem.querySelector('.wishlist-name');
-    const wishlistSummery = newWishlistItem.querySelector('.wishlist-summery');
-    const wishlistPrice = newWishlistItem.querySelector('.price');
-    const product = await fetchProductById(item.product_id);
-    newWishlistItem.dataset.wishlistItemId = item.id;
-
-    wishlistImg.src = `images/${product.image}`;
-    wishlistName.innerText = product.name;
-    wishlistSummery.innerText = product.summary;
-    wishlistPrice.innerText = product.price;
-    newWishlistItem.style.display = 'flex';
-
-    wishlistContent.appendChild(newWishlistItem);
 }

@@ -201,6 +201,13 @@ input[type="range"] {
     border-radius: 0 40% 0 0;
     padding: 0.8rem;
 }
+
+.product-image,
+.product-name h3,
+.product-summery,
+.price {
+    cursor: pointer;
+}
 /* cart-btn && product-quantity start */
 
 .buttons {
@@ -327,12 +334,18 @@ input[type="range"] {
     font-size: 20px;
     margin-right: 4px;
     background-color: transparent;
-    border: #4dbc84 solid 1px;
     min-width: 38px;
     cursor: pointer;
 }
 
 .pagination-wrapper button:hover {
-    background-color: #6dbe96;
+    color: #6dbe96;
     transition: all 0.5s ease;
+}
+
+.pagination-wrapper button.active {
+    background-color: #4dbc84;
+    border-radius: 35%;
+    color: #fff;
+    font-weight: bold;
 }
