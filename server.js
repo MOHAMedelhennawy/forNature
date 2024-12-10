@@ -69,8 +69,7 @@ app.get('*', checkUser, checkUserCart);
 app.use(authRouter);
 // routes
 app.get('/products', (req, res, next) => res.render('products'));
-app.get('/cart', (req, res, next) => res.render('cart'));
-app.get('/favourate', (req, res, next) => res.render('favourate'));
+app.get('/product/:id', (req, res, next) => res.render('product'));
 app.use('/admin', adminRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/products', productsRouter);
@@ -79,7 +78,7 @@ app.use('/api/v1/wishlist', wishlistRouter);
 app.use('/api/v1/order', orderRouter);
 app.use('/api/v1/category', categoryRouter);
 app.get('/', (req, res, next) => res.render('home'));
-app.get('/product/:id', (req, res, next) => res.send('Product with id'));
+
 // Middleware to disconnect Prisma after each request
 app.use(async (req, res, next) => {
   try {

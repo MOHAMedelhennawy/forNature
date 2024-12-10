@@ -30,22 +30,23 @@ export function toggleCartButton(newItem, cartItemMap, productId) {
  * @param {HTMLElement} quantityButton
  */
 export async function handleQuantityButtonsClick(quantityButton) {
-    const targetedItem = quantityButton.closest('.product-item, .cart-item');
+    const targetedItem = quantityButton.closest('.product-item, .cart-item, .prod-container');
     const cartBtn = targetedItem.querySelector('.cart-btn');
     const quantityElement = targetedItem.querySelector('.quantity');
     const currentQuantity = parseInt(quantityElement.innerText);  // Current quantity shown
     const increment = quantityButton.classList.contains('increase-quantity') ? 1 : -1;
-    const productPrice = targetedItem.querySelector('.price').innerText;
+    const productPrice = targetedItem.querySelector('.price') || targetedItem.querySelector('.prod-price .p');
+    const price = productPrice.innerText;
     const newQuantity = currentQuantity + increment;  // Calculate new quantity
     const cartItemId = targetedItem.dataset.cartItemId;
 
     // Only update if the new quantity is 1 or more
     if (newQuantity > 0) {
         console.log(`new quantity is equal to: ${newQuantity}`);
-        await updateQuantity(cartItemId, quantityElement, increment, productPrice);
+        await updateQuantity(cartItemId, quantityElement, increment, price);
     } else {
         console.log(`new quantity is equal to: ${newQuantity}`);
-        await removeFromCart(cartItemId, productPrice);
+        await removeFromCart(cartItemId, price);
     }
 }
 
@@ -78,14 +79,18 @@ export async function removeFromCart(cartItemId, productPrice) {
  * @param {HTMLElement} productItem - The product item element containing the cart and quantity buttons.
  */
 export async function handleCartButtonClick(cartBtn) {
-    const productItem = cartBtn.closest('.product-item');  // Get the closest parent with class "product-item"
-    const productPrice = productItem.querySelector('.price').innerText;
+    const productItem = cartBtn.closest('.product-item, .prod-container');  // Get the closest parent with class "product-item"
+    const productPrice = productItem.querySelector('.price') || productItem.querySelector('.prod-price .p');
+    const price = productPrice.innerText;
     const productId = productItem.dataset.id;  // Retrieve product ID from data attribute
 
+    console.log(productItem);
+    console.log(price);
+    console.log(productId);
     try {
         const response = await fetch('/api/cart', {
             method: 'POST',
-            body: JSON.stringify({ productId, price: productPrice }),
+            body: JSON.stringify({ productId, price }),
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -147,9 +152,10 @@ export function updateQuantityInUI(cartItemId, newQuantity) {
 
     if (newQuantity === 0) {
         itemsToUpdate.forEach((element) => {
+            console.log(element)
             if (element.classList.contains('cart-item')) {
                 element.style.display = 'none';
-            } else if (element.classList.contains('product-item')) {
+            } else if (element.classList.contains('product-item') || element.classList.contains('prod-container')) {
                 element.querySelector('.quantity-btn').style.display = 'none';
                 element.querySelector('.cart-btn').style.display = 'block';
             }

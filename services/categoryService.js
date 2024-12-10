@@ -4,7 +4,7 @@ import logger from "../utils/logger.js";
 
 const prisma = new PrismaClient();
 
-export const getCategoryAndSubCatgeory = async (name) => {
+export const getCategoryAndSubCatgeory = async (id, name) => {
     try {
         const where = name ? { name } : {};
 
