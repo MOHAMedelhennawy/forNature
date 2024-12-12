@@ -92,6 +92,11 @@
     transition: 1s;
 }
 
+.prod-content .buttons .quantity-btn {
+    width: 300px;
+    margin-right: 20px;
+}
+
 .hr {
     width: 100%;
     padding-top: 90px;

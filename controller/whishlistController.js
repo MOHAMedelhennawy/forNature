@@ -56,6 +56,7 @@ export const deleteNewItemFromWishlist = async (req, res, next) => {
         if (!id) throw new Error('wishlist item id is missing');
 
         const deletedItem = await deleteDataByID('wishlist', id)
+
         if (deletedItem) {
             logger.info('deleted successfully');
             res.status(200).json({ deletedItem, message: 'deleted successfully' })

@@ -95,7 +95,7 @@ async function addEventListeners2(cart) {
             
             const { deletedItem } = await fetchDeleteWishlistItem(id);
             if (deletedItem) {
-                const productGrid = document.querySelector('.product-grid');
+                const productGrid = document.querySelector('.product-grid, .prod-container');
                 const product = productGrid.querySelector(`.product-item[data-wishlist-item-id="${id}"]`);
                 if (product) {
                     const favorateIcon = product.querySelector(".material-icons");

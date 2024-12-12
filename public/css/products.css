@@ -30,6 +30,27 @@
 
 .sidebar-content {
     padding: 15px;
+    height: 100%;
+}
+
+.filteration-form {
+    height: 100%;
+}
+
+.filteration-btn {
+    position: absolute;
+    margin: auto;
+    bottom: 25px;
+    width: 25rem;
+}
+
+.filteration-btn input{
+    cursor: pointer;
+    color: white;
+    border: none;
+    width: 50%;
+    height: 3rem;
+    background-color: #4dbc84;
 }
 
 .sidebar-content ul {

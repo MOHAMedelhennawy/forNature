@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import logger from '../utils/logger.js';
 
 const prisma = new PrismaClient()
 const models = {
@@ -77,7 +78,6 @@ export const updateDataByID = async (model, id, info) => {
 }
 
 export const deleteDataByID = async (model, id) => {
-    
     try {
         model = checkModel(model);
 
@@ -85,6 +85,7 @@ export const deleteDataByID = async (model, id) => {
 
         return await model.delete({ where: {id} })
     } catch(error) {
+        logger.error(error.message)
         throw new Error(`Failed to delete data: ${error.message}`);
     }
 }

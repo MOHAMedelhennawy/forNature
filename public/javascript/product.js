@@ -1,10 +1,11 @@
-import { fetchProductById } from '/javascript/api/category.js'
-import { handleCartButtonClick, handleQuantityButtonsClick } from '/javascript/components/cart.js'
+import { fetchProductById, fetchCartItems } from '/javascript/api/category.js'
+import { handleCartButtonClick, handleQuantityButtonsClick, toggleCartButton } from '/javascript/components/cart.js'
+import { fetchCartAndWishlist, toggleWishlistButton, handleFavourateButtonClick } from '/javascript/components/wishlist.js'
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    await renderProduct();
-    await productEventListener();
+    const { user } = await renderProduct();
+    await productEventListener(user);
 })
 
 async function renderProduct() {
@@ -14,15 +15,19 @@ async function renderProduct() {
     // fetch product using id
     const data = await fetchProductById(id);
 
+    
     // display product
     displayProduct(data);
+
+    return data;
 }
 
 function getUrlParams() {
     return window.location.href.split('/')[4];
 }
 
-function displayProduct(product) {
+async function displayProduct(data) {
+    const { product, user } = data;
     const prodContainer = document.querySelector('.prod-container');
 
     prodContainer.innerHTML = `
@@ -59,21 +64,29 @@ function displayProduct(product) {
     </div>
     `;
     prodContainer.dataset.id = product.id;
+
+    
+    if (user) {
+        const [cartItemMap, wishlistMap] = await fetchCartAndWishlist();
+        toggleCartButton(prodContainer, cartItemMap, product.id);
+        toggleWishlistButton(prodContainer, wishlistMap, product.id)
+    }
 }
 
-async function productEventListener() {
+async function productEventListener(user) {
     
+    console.log(user)
     document.addEventListener('click', async (event) => {
         const cartBtn = event.target.closest('.cart-btn');  // Check if the clicked element or its parent is the cart button
         const quantityButton = event.target.closest('.decrease-quantity, .increase-quantity');  // Check if the clicked element is a quantity button (increase or decrease)
         const favourateBtn = event.target.closest('.favorate-btn');
 
         if (cartBtn) {
-            await handleAction(true, () => handleCartButtonClick(cartBtn));
+            await handleAction(user, () => handleCartButtonClick(cartBtn));
         } else if (quantityButton) {
-            await handleAction(true, () => handleQuantityButtonsClick(quantityButton));
+            await handleAction(user, () => handleQuantityButtonsClick(quantityButton));
         } else if (favourateBtn) {
-            // await handleAction(true, () => handleFavourateButtonClick(user.id, favourateBtn));
+            await handleAction(user, () => handleFavourateButtonClick(user.id, favourateBtn));
         }
     })
 }

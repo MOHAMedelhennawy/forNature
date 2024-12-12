@@ -182,10 +182,10 @@ export async function addCartItemsToCartInUi(item, cartContent, cartItemElement)
     const cartSummery = newCartItem.querySelector('.cart-summery');
     const cartQuantity = newCartItem.querySelector('.quantity-btn.cart .quantity');
     const cartPrice = newCartItem.querySelector('.price');
-    const product = await fetchProductById(item.product_id);
+    const { product } = await fetchProductById(item.product_id);
     newCartItem.dataset.cartItemId = item.id;
 
-    cartImg.src = `images/${product.image}`;
+    cartImg.src = `/images/${product.image}`;
     cartName.innerText = product.name;
     cartSummery.innerText = product.summary;
     cartQuantity.innerText = item.quantity;

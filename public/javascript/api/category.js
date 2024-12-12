@@ -30,12 +30,13 @@ export async function fetchProductById(id) {
 
     if (!response.ok) console.error(`Failed to get product with ${id}`);
 
-    return response.json();
+    
+    return await response.json();
 }
 
 export async function fetchDeleteWishlistItem(id) {
     try {
-        const response = await fetch(`api/v1/wishlist/${id}`, {
+        const response = await fetch(`/api/v1/wishlist/${id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -44,7 +45,7 @@ export async function fetchDeleteWishlistItem(id) {
             throw new Error('Failed to delete item from wishlist');
         }
 
-        return response.json() || null;
+        return await response.json() || null;
     } catch (error) {
         console.error('Error in fetchDeleteWishlistItem:', error);
         throw error;

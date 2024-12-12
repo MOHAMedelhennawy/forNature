@@ -7,23 +7,22 @@ export const getAllCartItems = async (req, res, next) => {
         const cart = res.locals.cart;
         const user = res.locals.user;
 
-        if (!user) {
-            logger.warn('User is not authenticated. Skipping cart retrieval.');
-            return res.status(401).json({ message: 'User not authenticated.' });
-        }
+        if (user) {
 
-        if (cart && cart.id) {
-            const allCartItems = await getAllItems(cart.id);
+            
+            if (cart && cart.id) {
+                const allCartItems = await getAllItems(cart.id);
 
-            res.status(200).json({ allCartItems, cart });
-            logger.info(`Retrieved ${allCartItems.length} items from cart ${cart.id}`);
-        } else {
-            res.status(200).json({
-                message: 'Cart is empty',
-                items: []
-            });
-            logger.info(`Cart is empty for user ${user.id}`);
-        }
+                res.status(200).json({ allCartItems, cart });
+                logger.info(`Retrieved ${allCartItems.length} items from cart ${cart.id}`);
+            } else {
+                res.status(200).json({
+                    message: 'Cart is empty',
+                    items: []
+                });
+                logger.info(`Cart is empty for user ${user.id}`);
+            }
+    }
     } catch (error) {
         logger.error(`Failed to get cart items: ${error.message}`);
         next(error);

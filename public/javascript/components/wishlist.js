@@ -2,6 +2,7 @@ import {
     fetchProductById,
     fetchDeleteWishlistItem,
 } from '/javascript/api/category.js'
+
 export function toggleWishlistButton(newItem, wihslistMap, productId) {
 
     if (!wihslistMap) return;
@@ -21,11 +22,11 @@ export function toggleWishlistButton(newItem, wihslistMap, productId) {
  *            return null if there no itmes
  */
 export async function fetchCartAndWishlist() {
-    const cartItemsResponse = await fetch('api/cart');
+    const cartItemsResponse = await fetch('/api/cart');
     const {allCartItems} = await cartItemsResponse.json();
     const cartItemMap = Array.isArray(allCartItems) ? new Map(allCartItems.map(item => [item.product_id, item])) : null;
 
-    const wishlistResponse = await fetch('api/v1/wishlist');
+    const wishlistResponse = await fetch('/api/v1/wishlist');
     const wishlistResult = await wishlistResponse.json();
     const wishlistMap =  Array.isArray(wishlistResult) ? new Map(wishlistResult.map(item => [item.product_id, item])) : null;
 
@@ -43,7 +44,7 @@ export async function fetchCartAndWishlist() {
  * @param {HTMLElement} favourateBtn - The favourate item element
  */
 export async function handleFavourateButtonClick(userId, favourateBtn) {
-    const productItem = favourateBtn.closest('.product-item');
+    const productItem = favourateBtn.closest('.product-item, .prod-container');
     const productId = productItem.dataset.id;
 
     const responseGetAllWishlist = await fetch(`/api/v1/wishlist?userId=${userId}&productId=${productId}`, {
@@ -107,10 +108,10 @@ export async function addWishlistItemToWihslistUi(item, wishlistContent, wishlis
     const wishlistName = newWishlistItem.querySelector('.wishlist-name');
     const wishlistSummery = newWishlistItem.querySelector('.wishlist-summery');
     const wishlistPrice = newWishlistItem.querySelector('.price');
-    const product = await fetchProductById(item.product_id);
+    const { product } = await fetchProductById(item.product_id);
     newWishlistItem.dataset.wishlistItemId = item.id;
 
-    wishlistImg.src = `images/${product.image}`;
+    wishlistImg.src = `/images/${product.image}`;
     wishlistName.innerText = product.name;
     wishlistSummery.innerText = product.summary;
     wishlistPrice.innerText = product.price;

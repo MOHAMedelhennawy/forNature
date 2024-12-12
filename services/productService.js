@@ -70,3 +70,26 @@ export const getAllProductsData = async (page, limit, categoryQuery, subCategory
         throw new Error(`Failed to get data: ${error.message}`);
     }
 }
+
+export const getProductByID = async (id, filter = false) => {   
+    try {
+        
+        let include = {};
+        if (!id) throw new Error(`Id is missing`);
+        
+        if (filter) {
+            include = {
+                category: true,
+                subCategory: true,
+                // reviews: true,
+            }
+        }
+
+        return await prisma.Porduct.findUnique({
+            where: { id },
+            include,
+        });
+    } catch(error) {
+        throw new Error(`Failed to get data: ${error.message};`)
+    }
+}

@@ -35,13 +35,14 @@ export const getAllProducts = async (req, res, next) => {
 export const getProductById = async (req, res, next) => {
     try {
         const id = req.params.id || undefined;
-
+        const user = res.locals.user;
+        
         if (!id)
             res.status(404).json({ error: 'product id is missing'});
 
         const product = await getDataByID('product', id);
 
-        res.status(200).json(product);
+        res.status(200).json({ product, user });
     } catch (error) {
         next(error);
     }
