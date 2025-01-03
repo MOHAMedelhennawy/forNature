@@ -63,7 +63,6 @@ export const getAllProductsData = async (page, limit, categoryQuery, subCategory
             where: queryOptions.where,
         });
 
-        console.log(queryOptions)
         return { data, total };
     } catch(error) {
         logger.error(`Failed to get data: ${error.message}`);
@@ -73,22 +72,30 @@ export const getAllProductsData = async (page, limit, categoryQuery, subCategory
 
 export const getProductByID = async (id, filter = false) => {   
     try {
-        
         let include = {};
+
         if (!id) throw new Error(`Id is missing`);
         
         if (filter) {
             include = {
                 category: true,
                 subCategory: true,
-                // reviews: true,
+                reviews: {
+                    select: {
+                        user: true,
+                        review: true,
+                        rating: true,
+                    }
+                },
             }
         }
 
-        return await prisma.Porduct.findUnique({
+        const data =  await prisma.Product.findUnique({
             where: { id },
             include,
         });
+
+        return data;
     } catch(error) {
         throw new Error(`Failed to get data: ${error.message};`)
     }

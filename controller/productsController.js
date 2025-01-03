@@ -1,5 +1,6 @@
 import logger from '../utils/logger.js';
 import { createData, getAllData, getDataByID, getTotalItems } from '../services/dataService.js';
+import {getProductByID} from '../services/productService.js'
 import { getAllProductsData } from '../services/productService.js';
 
 export const getAllProducts = async (req, res, next) => {
@@ -40,7 +41,7 @@ export const getProductById = async (req, res, next) => {
         if (!id)
             res.status(404).json({ error: 'product id is missing'});
 
-        const product = await getDataByID('product', id);
+        const product = await getProductByID(id, true);
 
         res.status(200).json({ product, user });
     } catch (error) {
@@ -60,6 +61,7 @@ export const addNewProduct = async (req, res, next) => {
             message: 'Product added successfull!',
             newProduct
         })
+
     } catch (error) {
         logger.error(error.message)
         next(error);

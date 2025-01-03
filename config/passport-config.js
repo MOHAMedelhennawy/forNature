@@ -31,14 +31,14 @@ passport.use(
                 first_name: profile.name.givenName,
                 last_name: profile.name.familyName,
                 email: profile.emails[0].value,
-                password: null,
+                password: 'null',
                 phone_number: '0000',
             });
 
             const token = await generateAuthToken(newUser);
             done(null, { user: newUser, token });
         } catch (error) {
-            throw new Error('Failed to create new user.');
+            throw new Error(`Failed to create new user.: ${error.message}`);
         }
     }
   })

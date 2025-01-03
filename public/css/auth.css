@@ -156,3 +156,27 @@
     font-weight: 100;
     margin-left: 12px;
 }
+
+.OAuth2 .button {
+    box-shadow: -2px 4px #88888888;
+    background-color: white;
+    width: fit-content;
+}
+
+.google-auth {
+    text-decoration: none;
+    margin-top: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.google-auth img {
+    width: 25px;
+
+}
+
+.google-auth span{
+    color: black;
+}

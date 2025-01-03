@@ -1,0 +1,13 @@
+echo '
+PORT = 8000
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=elhennawy
+DB_PASSWORD=0000
+DB_NAME=furNature
+
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+JWT_SECRET=cbc17afa63f84d06a384908520f68ca3536ab37d686eb74e34b17ed5ab3e0f1c
+' >> .env

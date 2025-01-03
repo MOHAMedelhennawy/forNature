@@ -1,4 +1,4 @@
-import { fetchProductById, fetchCartItems } from '/javascript/api/category.js'
+import { fetchProductById, fetchPostReview } from '/javascript/api/category.js'
 import { handleCartButtonClick, handleQuantityButtonsClick, toggleCartButton } from '/javascript/components/cart.js'
 import { fetchCartAndWishlist, toggleWishlistButton, handleFavourateButtonClick } from '/javascript/components/wishlist.js'
 
@@ -15,7 +15,6 @@ async function renderProduct() {
     // fetch product using id
     const data = await fetchProductById(id);
 
-    
     // display product
     displayProduct(data);
 
@@ -29,6 +28,8 @@ function getUrlParams() {
 async function displayProduct(data) {
     const { product, user } = data;
     const prodContainer = document.querySelector('.prod-container');
+    const ratingSystemHTML = ratingSystem();
+    const reviewHTML = getReviewViews(product, user);
 
     prodContainer.innerHTML = `
     <div class="prod-grid">
@@ -36,7 +37,7 @@ async function displayProduct(data) {
             <div class="prod-info">
                 <div class="img"><img src="/images/${product.image}" alt=""></div>
                 <div class="info">
-                    <div class="prod-category"><a class="category">Living room,</a>&nbsp;<a class="subCategory">Sofas</a></div>
+                    <div class="prod-category"><a class="category">${product.category.name},</a>&nbsp;<a class="subCategory">${product.subCategory.name}</a></div>
                     <h1 class="prod-name">${product.name}</h1>
                     <div class="prod-price">$<span class="p">${product.price}</span> &nbsp;<span class="shipping">+Free Shipping</span></div>
                     <p class="prod-summary">${product.summary}</p>
@@ -60,6 +61,16 @@ async function displayProduct(data) {
         <div class="hr"></div>
         <div class="prod-reviews">
             <h1>Reviews</h1>
+            <form class="review-form">
+                <textarea id="reivew" name="review"></textarea>
+                <div class="rate">
+                    ${ratingSystemHTML}
+                    <button class="review-btn">Click me!</button>
+                </div>
+            </form>
+            <div class="reviews">
+                ${reviewHTML}
+            </div>
         </div>
     </div>
     `;
@@ -73,9 +84,56 @@ async function displayProduct(data) {
     }
 }
 
+function ratingSystem() {
+    return `
+    <div class="container__items">
+        <input type="radio" name="stars" id="st5">
+        <label for="st5">
+            <div class="star-stroke">
+                <div class="star-fill"></div>
+            </div>
+            <div class="label-description" data-content="5"></div>
+        </label>
+
+        <input type="radio" name="stars" id="st4">
+        <label for="st4">
+            <div class="star-stroke">
+                <div class="star-fill"></div>
+            </div>
+            <div class="label-description" data-content="4"></div>
+        </label>
+
+        <input type="radio" name="stars" id="st3">
+        <label for="st3">
+            <div class="star-stroke">
+                <div class="star-fill"></div>
+            </div>
+            <div class="label-description" data-content="3"></div>
+        </label>
+
+        <input type="radio" name="stars" id="st2">
+        <label for="st2">
+            <div class="star-stroke">
+                <div class="star-fill"></div>
+            </div>
+            <div class="label-description" data-content="2"></div>
+        </label>
+
+        <input type="radio" name="stars" id="st1">
+        <label for="st1">
+            <div class="star-stroke">
+                <div class="star-fill"></div>
+            </div>
+            <div class="label-description" data-content="1"></div>
+        </label>
+  </div>
+  `
+}
+
 async function productEventListener(user) {
-    
-    console.log(user)
+
+    const reviewForm = document.querySelector('.review-form');
+
     document.addEventListener('click', async (event) => {
         const cartBtn = event.target.closest('.cart-btn');  // Check if the clicked element or its parent is the cart button
         const quantityButton = event.target.closest('.decrease-quantity, .increase-quantity');  // Check if the clicked element is a quantity button (increase or decrease)
@@ -89,8 +147,41 @@ async function productEventListener(user) {
             await handleAction(user, () => handleFavourateButtonClick(user.id, favourateBtn));
         }
     })
-}
 
+    document.addEventListener('submit', async (event) => {
+        const reviewForm = event.target.closest('.review-form');
+        
+        if (!reviewForm) return;
+        
+        event.preventDefault();
+
+        const rating = document.querySelector('.container__items input[name="stars"]:checked').nextElementSibling.querySelector('.label-description').dataset.content;
+        const review = reviewForm.review.value;
+        const product_id = document.querySelector('.prod-container').dataset.id;
+
+        if (!rating) {
+            console.error('Please select a rating.');
+            return;
+        }
+
+        if (!review.trim()) {
+            console.error("Please write a review.");
+            return;
+        }
+
+        const reviewResponse = await fetchPostReview(product_id, review, rating);
+
+        if (!reviewResponse) {
+            console.error('Failed to add your review, please try again.');
+        } else {
+            const reviewsElement = document.querySelector('.reviews');
+            const reviewsHTML = reviewsElement.innerHTML;
+
+            // ...
+        }
+    });
+    
+}
 
 async function handleAction(user, action) {
     if (user) {
@@ -99,4 +190,47 @@ async function handleAction(user, action) {
         console.error('Please login and try again');
         window.location.assign('/login');
     }
+}
+
+function getReviewViews(product) {
+    let reviewsHTML = '';
+
+    product.reviews.forEach(review => {
+        reviewsHTML += displayReview(review);
+    });
+
+    return reviewsHTML;
+}
+
+function ratingStars(rate) {
+    let stars = '';
+
+    for (let i = 0; i < 5; i++) {
+        if (i < rate) {
+            stars += `
+                <span class="fa fa-star checked"></span>
+            `
+        } else {
+            stars += `
+            <span class="fa fa-star"></span>
+        `
+        }
+    }
+
+    return stars
+}
+
+function displayReview(review) {
+    return `
+            <div class="review">
+                <div class="review-user">
+                    <img src="/images/user.png" alt="${review.user.first_name}" class="user-image">
+                    <span class="user-name">${review.user.first_name} ${review.user.last_name}</span>
+                </div>
+                <div class="review-content">
+                    <p class="user-rate">${ratingStars(review.rating)}</p>
+                    <p class="user-review">${review.review}</p>
+                </div>
+            </div>
+        `
 }

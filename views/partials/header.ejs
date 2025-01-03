@@ -16,7 +16,10 @@
 
             <ul class="items">
                 <li><a href="/">Home</a></li>
-                <li><a href="/products">Products</a></li>
+                <li>
+                    <a href="/products">Products</a>
+
+                </li>
                 <li><a href="#">About us</a></li>
                 <li><a href="#">Content</a></li>
             </ul>
@@ -25,6 +28,10 @@
                 <ul>
                     <li class="wishlist-link"><i class="material-icons">favorite</i></li>
                     <li class="cart-link"><a><i class="material-icons">shopping_cart</i></a></li>
+                    <% if (user?.isAdmin) { %>
+                        <li><a href="/admin"><i class="material-icons">admin_panel_settings</i>
+                        </a></li>
+                    <% }%>
                     <% if (user) { %>
                         <li><a href="/logout"><i class="material-icons">logout</i></a></li>
                     <% } else {%>

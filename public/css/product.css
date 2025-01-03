@@ -1,11 +1,11 @@
 .prod-container {
-    height: 100vi;
+    height: fit-content;
     padding-top: 61px;
     background-color: #f0f0f0;
 }
 
 .prod-grid {
-    height: 100vi;
+    height: fit-content;
     margin: 0 12rem;
     background-color: white;
     padding: 40px;
@@ -116,4 +116,140 @@
 
 .prod-description h1{
     font-style: normal;
+}
+
+
+/* rating start system */
+:root{
+    --primary-colour: #fff;
+    --secondary-colour: #4dbc84;
+   
+    --star-colour: hsl(38 90% 55%);
+  }
+
+
+.container__items{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    gap: 0 .5em;
+    width: 17%;
+    height: fit-content;
+}
+  
+.container__items input{
+    display: none;
+}
+  
+.container__items label{
+    width: 20%;
+    aspect-ratio: 1;
+    cursor: pointer;
+}
+  
+.container__items label .star-stroke{
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background: var(--secondary-colour);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+  
+.container__items label .star-stroke .star-fill{
+    width: 70%;
+    aspect-ratio: 1;
+    background: var(--primary-colour);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+  
+.container__items input:hover ~ label .star-stroke,.container__items input:checked ~ label .star-stroke{
+    background: var(--star-colour);
+}
+  
+.container__items input:checked ~ label .star-stroke .star-fill{
+    background: var(--star-colour);
+}
+  
+.container__items label:hover .label-description::after{
+    content: attr(data-content);
+    position: fixed;
+    left: 0;
+    right: 0;
+    
+    margin-top: 1em;
+    margin-inline: auto;
+    
+    width: 100%;
+    height: 2em;
+    
+    color: #fff;
+    
+    text-align: center;
+    font-size: 2rem;
+    
+    transform: rotateY(180deg);
+}
+
+.rate {
+    display: flex;
+    justify-content: space-between;
+}
+
+.review-btn {
+    color: white;
+    background-color: #4dbc84;
+    cursor: pointer;
+    border: none;
+    width: 80px;
+    height: 30px;
+}
+
+.review-btn:hover {
+    transition: 1s all ease;
+    background-color: #2a7c53;
+}
+
+.rate {
+    margin-top: 5px;
+}
+
+.review {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.review-user {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.user-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.review-content {
+    padding-left: 10px;
+}
+
+.user-rate {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.user-review {
+    font-size: 1em;
+    color: #333;
 }

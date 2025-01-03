@@ -48,6 +48,23 @@ export async function fetchDeleteWishlistItem(id) {
         return await response.json() || null;
     } catch (error) {
         console.error('Error in fetchDeleteWishlistItem:', error);
-        throw error;
+    }
+}
+
+export async function fetchPostReview (product_id, review, rating) {
+    try {
+        const response = await fetch('/api/v1/review', {
+            method: 'POST',
+            body: JSON.stringify({ product_id, review, rating }),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response) {
+            throw new Error('Falied to add review');
+        }
+
+        return await response.json() || null;
+    } catch (error) {
+        console.error(`Falied to add review ${error.message}`);
     }
 }

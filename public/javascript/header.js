@@ -92,14 +92,20 @@ async function addEventListeners2(cart) {
         if (deleteWishlistBtn) {
             const wishlistItem = deleteWishlistBtn.closest('.wishlist-item');
             const id = wishlistItem.dataset.wishlistItemId;
-            
+
             const { deletedItem } = await fetchDeleteWishlistItem(id);
+
             if (deletedItem) {
                 const productGrid = document.querySelector('.product-grid, .prod-container');
-                const product = productGrid.querySelector(`.product-item[data-wishlist-item-id="${id}"]`);
-                if (product) {
-                    const favorateIcon = product.querySelector(".material-icons");
-                    favorateIcon.style.color = 'black';
+
+                if (productGrid) {
+                    const product = productGrid.querySelector(`.product-item[data-wishlist-item-id="${id}"]`);
+
+                    if (product) {
+                        const favorateIcon = product.querySelector(".material-icons");
+                        favorateIcon.style.color = 'black';
+                    }
+
                 }
                 wishlistItem.remove();
             }

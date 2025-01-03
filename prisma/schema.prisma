@@ -9,6 +9,7 @@
 //  npx prisma generate
 //  npx prisma migrate dev --name init --create-only
 //  npx prisma migrate deploy
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -35,6 +36,7 @@ model User {
   order             Order[]
   addresses         Address[]
   wishlist          Wishlist[]
+  review            Review[]
 }
 
 
@@ -85,6 +87,7 @@ model Product {
   wishlist          Wishlist[]
   cartItem          CartItems[]
   orderItems        OrderItems[]
+  reviews           Review[]
   category          Category     @relation(fields: [category_id], references: [id])
   subCategory       SubCategory  @relation(fields: [subCategory_id], references: [id])
 }
@@ -162,5 +165,17 @@ model OrderItems {
   product_id        String
   quantity          Int
   order             Order         @relation(fields: [order_id], references: [id])
+  product           Product       @relation(fields: [product_id], references: [id])
+}
+
+model Review {
+  id                String        @id @default(uuid())
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  user_id           String
+  product_id        String
+  rating            Int
+  review            String        @db.VarChar(2000)
+  user              User          @relation(fields: [user_id], references: [id])
   product           Product       @relation(fields: [product_id], references: [id])
 }

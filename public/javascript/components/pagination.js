@@ -72,6 +72,7 @@ export async function chageCurrentPage(event, startProducts) {
             currentPage = parseInt(event.target.textContent) || 1;
         }
     
+        console.log(currentPage)
         await startProducts(currentPage);
         window.scrollTo({
             top: 0,
