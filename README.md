@@ -9,6 +9,7 @@ This project is a furniture e-commerce website that enables users to browse, sea
 - User authentication and authorization using JWT.
 - Integration with Google for third-party login.
 - Product management with categories and subcategories.
+- Admin dashboard to view orders.
 - Cart and wishlist functionality.
 - API design following RESTful standards.
 
@@ -23,9 +24,22 @@ Follow these steps to set up and run the project locally:
    cd furniture-website
    ```
 
-2. Create an `.env` file with the following content:
-   ```bash
-   ./install.sh
+2. Create an `.env` file with the following example:
+   ```
+   PORT=8000
+
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=elhennawy
+   DB_PASSWORD=0000
+   DB_NAME=furNature
+
+   DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+   JWT_SECRET=<uuid4>
+
+   GOOGLE_CLIENT_ID=<CLIENT_ID>
+   GOOGLE_CLIENT_SECRET=<CLIENT_SECRET>
    ```
 
 3. Install the required packages:
@@ -59,15 +73,22 @@ Follow these steps to set up and run the project locally:
 
 ## Project Structure
 ```
-├── controllers/     # Route handlers
-├── models/          # Prisma schema and database models
-├── routes/          # API routes
-├── utils/           # Utility functions (e.g., fake data generation)
-├── views/           # EJS templates for frontend rendering
-├── public/          # Static assets (CSS, JS, images)
-├── .env             # Environment variables
+├── config/            # Configuration files
+├── controller/        # Application logic for routes
+├── middleware/        # Express middleware functions
+├── prisma/            # Prisma schema and migrations
+├── public/            # Static assets (CSS, JS, images)
+├── routes/            # API route definitions
+├── services/          # Service layer for business logic
+├── test/              # Testing files
+├── utils/             # Utility functions (e.g., fake data generation)
+├── validators/        # Validation logic for inputs
+├── views/             # EJS templates for frontend rendering
 ├── docker-compose.yml # Docker configuration
-└── server.js        # Application entry point
+├── jest.config.mjs    # Jest configuration for testing
+├── package.json       # Node.js dependencies and scripts
+├── server.js          # Application entry point
+└── tsconfig.json      # TypeScript configuration
 ```
 
 ---
