@@ -21,7 +21,7 @@ Follow these steps to set up and run the project locally:
 1. Clone the repository:
    ```bash
    git clone https://github.com/MOHAMedelhennawy/forNature.git
-   cd furniture-website
+   cd forNature
    ```
 
 2. Create an `.env` file with the following example:
