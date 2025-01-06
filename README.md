@@ -102,8 +102,3 @@ Follow these steps to set up and run the project locally:
 
 ## License
 This project is licensed under the MIT License.
-
----
-
-## Acknowledgements
-Special thanks to everyone who contributed to the development of this project.

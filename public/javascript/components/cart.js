@@ -42,10 +42,8 @@ export async function handleQuantityButtonsClick(quantityButton) {
 
     // Only update if the new quantity is 1 or more
     if (newQuantity > 0) {
-        console.log(`new quantity is equal to: ${newQuantity}`);
         await updateQuantity(cartItemId, quantityElement, increment, price);
     } else {
-        console.log(`new quantity is equal to: ${newQuantity}`);
         await removeFromCart(cartItemId, price);
     }
 }
@@ -84,9 +82,6 @@ export async function handleCartButtonClick(cartBtn) {
     const price = productPrice.innerText;
     const productId = productItem.dataset.id;  // Retrieve product ID from data attribute
 
-    console.log(productItem);
-    console.log(price);
-    console.log(productId);
     try {
         const response = await fetch('/api/cart', {
             method: 'POST',
@@ -135,7 +130,7 @@ export async function updateQuantity(cartItemId, quantityElement, increment, pro
         });
         
         if (response.ok) {
-            updateQuantityInUI(cartItemId, currentQuantity);
+            updateQuantityInUI(cartItemId, currentQuantity, increment);
         } else {
             console.error('Failed to update cart item quantity');
         }
@@ -144,15 +139,22 @@ export async function updateQuantity(cartItemId, quantityElement, increment, pro
     }
 }
 
-export function updateQuantityInUI(cartItemId, newQuantity) {
+export function updateQuantityInUI(cartItemId, newQuantity, increment) {
     const itemsToUpdate = document.querySelectorAll(`[data-cart-item-id="${cartItemId}"]`);   // get elements with cartItemId from products and cart
     itemsToUpdate.forEach((element) => {    // loop to update the value
         element.querySelector('.quantity').innerText = newQuantity;
+
+        if (element.classList.contains('cart-item')) {
+            const productPrice  = element.querySelector('.price');
+            const totalProductPrice = element.querySelector('.test');
+            const updatedPrice = parseFloat(totalProductPrice.innerText) + (parseFloat(productPrice.innerText) * increment);
+
+            totalProductPrice.innerText = updatedPrice.toFixed(2);
+        }
     });
 
     if (newQuantity === 0) {
         itemsToUpdate.forEach((element) => {
-            console.log(element)
             if (element.classList.contains('cart-item')) {
                 element.style.display = 'none';
             } else if (element.classList.contains('product-item') || element.classList.contains('prod-container')) {
@@ -182,7 +184,9 @@ export async function addCartItemsToCartInUi(item, cartContent, cartItemElement)
     const cartSummery = newCartItem.querySelector('.cart-summery');
     const cartQuantity = newCartItem.querySelector('.quantity-btn.cart .quantity');
     const cartPrice = newCartItem.querySelector('.price');
+    const test = newCartItem.querySelector('.test');
     const { product } = await fetchProductById(item.product_id);
+    const totalProductPrice = product.price * item.quantity;
     newCartItem.dataset.cartItemId = item.id;
 
     cartImg.src = `/images/${product.image}`;
@@ -191,6 +195,6 @@ export async function addCartItemsToCartInUi(item, cartContent, cartItemElement)
     cartQuantity.innerText = item.quantity;
     cartPrice.innerText = product.price;
     newCartItem.style.display = 'flex';
-
+    test.innerText = totalProductPrice.toFixed(2);
     cartContent.appendChild(newCartItem);
 }

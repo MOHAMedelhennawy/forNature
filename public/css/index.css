@@ -64,12 +64,12 @@
 /* cart start and wishlist */
 .cart-container, .wishlist-container {
     position: relative;
-    width: 0;
+    width: 25rem;
+    right: -25rem;
     height: 100%;
     background-color: white;
     position: fixed;
-    right: 0;
-    z-index: 2;
+    /* z-index: 2; */
     transition: all 1s ease;
 }
 
@@ -91,7 +91,6 @@
     margin-bottom: 20px;
     transition: all 3s ease;
     box-shadow: 0 2px 5px 0 #888;
-    border-bottom: 5px solid greenyellow;
 }
 
 .cart-grid {

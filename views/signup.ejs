@@ -1,4 +1,4 @@
-<%- include('partials/head'); -%>
+<%- include('partials/header'); -%>
 <script src="/javascript/signup.js"></script>
 
 <form id="signup-form" method="POST" action="/signup">
@@ -44,11 +44,22 @@
             </div>
             <div class="text">Already have an account? &nbsp;<a class="redarect" href="/login"> Log in</a></div>
 
+            <!-- OAuth2 start -->
             <div class="OAuth2">
                 <div class="button">
-                    <a class="google-auth" href="/auth/google"><img src="/javascript/logo/pngwing.com.png" alt=""> <span>Sign in with google</span></i></a>
+                    <a class="google-auth" href="/auth/google"><img class="Oauth2-logo" src="/images/logo/pngwing.com.png" alt=""></i></a>
+                </div>
+                <div class="button">
+                    <a class="google-auth" href="/auth/google"><img class="Oauth2-logo" src="/images/logo/icons8-apple-logo-48.png" alt=""></i></a>
+                </div>
+                <div class="button">
+                    <a class="google-auth" href="/auth/google"><img class="Oauth2-logo" src="/images/logo/icons8-facebook-48(1).png" alt="facebook-new"/></a>
                 </div>
             </div>
+
+            <!-- OAuth2 end -->
+
+
         </div>
         <div class="image">
             <img src="images/ryan-riggins.jpg" alt="">

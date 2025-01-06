@@ -30,11 +30,11 @@ async function addEventListeners2(cart) {
 
     cartElement.addEventListener('click', () => {
         if (cartIsVisible) {
-            cartContainer.style.width = '0';
+            cartContainer.style.right = '-25rem';
         } else {
-            cartContainer.style.width = '25rem';
+            cartContainer.style.right = '0';
             if (wishlistIsVisible) {
-                wishlistContainer.style.width = '0';
+                wishlistContainer.style.right = '-25rem';
                 wishlistIsVisible = !wishlistIsVisible;
             }
     
@@ -45,11 +45,11 @@ async function addEventListeners2(cart) {
 
     wishlistElement.addEventListener('click', () => {
         if (wishlistIsVisible) {
-            wishlistContainer.style.width = '0';
+            wishlistContainer.style.right = '-25rem';
         } else {
-            wishlistContainer.style.width = '25rem';
+            wishlistContainer.style.right = '0';
             if (cartIsVisible) {
-                cartContainer.style.width = '0';
+                cartContainer.style.right = '-25rem';
                 cartIsVisible = !cartIsVisible
             }
         }

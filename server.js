@@ -67,8 +67,9 @@ const limiter = rateLimit({
   
 app.get('*', checkUser, checkUserCart);
 // app.use(limiter)
-app.use(authRouter);
+
 // routes
+app.use(authRouter);
 app.get('/products', (req, res, next) => res.render('products'));
 app.get('/product/:id', (req, res, next) => res.render('product'));
 app.use('/admin', adminRouter);
@@ -93,6 +94,6 @@ app.use(async (req, res, next) => {
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`server running now on http://localhost:${PORT}`);
 })
