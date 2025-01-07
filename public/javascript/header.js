@@ -2,7 +2,7 @@ import {
     fetchCartItems,
     fetchWishlistItems,
     fetchDeleteWishlistItem,
-} from '/javascript/api/category.js'
+} from '/javascript/api/apis.js'
 
 import { renderWishlistItems } from '/javascript/components/wishlist.js';
 import { renderUserCart, handleQuantityButtonsClick, removeFromCart} from '/javascript/components/cart.js';

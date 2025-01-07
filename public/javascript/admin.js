@@ -1,4 +1,4 @@
-import { fetchCategories } from '/javascript/api/category.js';
+import { fetchCategories } from '/javascript/api/apis.js';
 
 document.addEventListener('DOMContentLoaded', async _ => {
     const orders = await fetchOrders();
@@ -37,7 +37,7 @@ async function renderOrders(orders) {
                     }>Cancelled</option>
                 </select>
             </td>
-            <td>
+            <td class="order-buttons">
                 <button class="btn-view-details">View Details</button>
                 <button class="btn-delete">Delete</button>
             </td>
@@ -155,17 +155,19 @@ function adminEventListeners(orders) {
     const closePopupButton = document.getElementById('closePopup');
     const popup = document.getElementById('popup');
     const popupOverlay = document.getElementById('popup-overlay');
-    const viewButton = document.querySelector(`.btn-view-details`);
+    const orderButtons = document.querySelector('.order-buttons');
 
 
-    // Open order popup
-    if (orders.length > 0 && Array.isArray(orders)) {
-        viewButton.addEventListener('click', (event) => {
-            const order_id = event.target.closest('tr').id;
-    
-            openPopupWindow(popup, popupOverlay, order_id, viewDetails)
-        })
-    }
+    document.addEventListener('click', (event) => {
+        // Open order popup
+        if (orders.length > 0 && Array.isArray(orders)) {
+            if (event.target.classList.contains('btn-view-details')) {
+                console.log(event.target)
+                const order_id = event.target.closest('tr').id;
+                openPopupWindow(popup, popupOverlay, order_id, viewDetails)
+            }
+        }
+    })
 
     // Open product popup
     addProductBtn.addEventListener('click', () => openPopupWindow(popup, popupOverlay, null, renderProductForm));
@@ -203,7 +205,7 @@ async function viewDetails(orderId, popup) {
     orderItems.forEach(item => {
         tableContent += `
             <tr>
-                <td><img src="images/${item.product.image}" class="order-image" /></td>
+                <td><img src="images/products/${item.product.image}" class="order-image" /></td>
                 <td class="order-name">${item.product.name}</td>
                 <td class="order-price">${item.product.price}</td>
                 <td class="order-quantity">${item.quantity}</td>
@@ -316,6 +318,8 @@ async function submitProductForm(e, form) {
             console.log(await response.json())
             alert('Failed to uplad product');
             return;
+        } else {
+            location.reload();
         }
     } catch (error) {
         console.error('Error uploading product:', error);

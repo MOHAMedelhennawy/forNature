@@ -2,4 +2,3 @@ node_modules/
 .env
 app.log
 docker-data/
-public/images

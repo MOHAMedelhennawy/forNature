@@ -1,4 +1,4 @@
-import { fetchProductById } from '/javascript/api/category.js'
+import { fetchProductById } from '/javascript/api/apis.js'
 
 /**
  * 
@@ -189,7 +189,7 @@ export async function addCartItemsToCartInUi(item, cartContent, cartItemElement)
     const totalProductPrice = product.price * item.quantity;
     newCartItem.dataset.cartItemId = item.id;
 
-    cartImg.src = `/images/${product.image}`;
+    cartImg.src = `/images/products/${product.image}`;
     cartName.innerText = product.name;
     cartSummery.innerText = product.summary;
     cartQuantity.innerText = item.quantity;

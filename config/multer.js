@@ -3,7 +3,7 @@ import path from 'path';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join('public', 'images'));    // Define the path that files will saved in
+        cb(null, path.join('public', 'images/products'));    // Define the path that files will saved in
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);    // create random name

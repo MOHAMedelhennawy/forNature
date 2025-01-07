@@ -1,4 +1,4 @@
-import { fetchProductById, fetchPostReview } from '/javascript/api/category.js'
+import { fetchProductById, fetchPostReview } from '/javascript/api/apis.js'
 import { handleCartButtonClick, handleQuantityButtonsClick, toggleCartButton } from '/javascript/components/cart.js'
 import { fetchCartAndWishlist, toggleWishlistButton, handleFavourateButtonClick } from '/javascript/components/wishlist.js'
 
@@ -29,13 +29,13 @@ async function displayProduct(data) {
     const { product, user } = data;
     const prodContainer = document.querySelector('.prod-container');
     const ratingSystemHTML = ratingSystem();
-    const reviewHTML = getReviewViews(product, user);
+    const reviewHTML = getReviewViews(product);
 
     prodContainer.innerHTML = `
     <div class="prod-grid">
         <div class="prod-content">
             <div class="prod-info">
-                <div class="img"><img src="/images/${product.image}" alt=""></div>
+                <div class="img"><img src="/images/products/${product.image}" alt=""></div>
                 <div class="info">
                     <div class="prod-category"><a class="category">${product.category.name},</a>&nbsp;<a class="subCategory">${product.subCategory.name}</a></div>
                     <h1 class="prod-name">${product.name}</h1>
@@ -174,10 +174,19 @@ async function productEventListener(user) {
         if (!reviewResponse) {
             console.error('Failed to add your review, please try again.');
         } else {
+            const startContainer = document.querySelector('.container__items');
+            const startHTML = startContainer.innerHTML;
             const reviewsElement = document.querySelector('.reviews');
-            const reviewsHTML = reviewsElement.innerHTML;
+            const reviewInput = document.querySelector('.review-form textarea');
+            const review = reviewResponse.newReview;
 
-            // ...
+            review.user = reviewResponse.user;
+
+            const newReviewHTML = displayReview(review);
+            reviewsElement.innerHTML = newReviewHTML + reviewsElement.innerHTML;
+
+            reviewInput.value = '';
+            startContainer.innerHTML = startHTML;
         }
     });
     
@@ -224,7 +233,7 @@ function displayReview(review) {
     return `
             <div class="review">
                 <div class="review-user">
-                    <img src="/images/user.png" alt="${review.user.first_name}" class="user-image">
+                    <img src="/images/users/user.png" alt="${review.user.first_name}" class="user-image">
                     <span class="user-name">${review.user.first_name} ${review.user.last_name}</span>
                 </div>
                 <div class="review-content">

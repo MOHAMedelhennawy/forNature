@@ -1,7 +1,7 @@
 import {
     fetchProductById,
     fetchDeleteWishlistItem,
-} from '/javascript/api/category.js'
+} from '/javascript/api/apis.js'
 
 export function toggleWishlistButton(newItem, wihslistMap, productId) {
 
@@ -111,7 +111,7 @@ export async function addWishlistItemToWihslistUi(item, wishlistContent, wishlis
     const { product } = await fetchProductById(item.product_id);
     newWishlistItem.dataset.wishlistItemId = item.id;
 
-    wishlistImg.src = `/images/${product.image}`;
+    wishlistImg.src = `/images/products/${product.image}`;
     wishlistName.innerText = product.name;
     wishlistSummery.innerText = product.summary;
     wishlistPrice.innerText = product.price;

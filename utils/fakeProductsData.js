@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 
 const __dirname = path.resolve('.');
 const prisma = new PrismaClient();
-const imagesDir = path.join(__dirname, 'public', 'images');
+const imagesDir = path.join(__dirname, 'public', 'images/products');
 
 const categoriesData = [
     {

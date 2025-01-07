@@ -5,11 +5,11 @@
 }
 
 .prod-grid {
-    height: fit-content;
+    width: 70%;
+    height: 100vi;
     margin: 0 12rem;
     background-color: white;
     padding: 40px;
-
 }
 
 .prod-content {

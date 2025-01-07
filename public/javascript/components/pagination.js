@@ -61,21 +61,20 @@ export function renderPaginationButtons(currentPage, totalPages) {
 
 export async function chageCurrentPage(event, startProducts) {
     const previousBtn = event.target.closest('.previousBtn');
-        const nextBtn = event.target.closest('.nextBtn');
-        let currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
-    
-        if (previousBtn) {
-            currentPage = Math.max(1, currentPage - 1);
-        } else if (nextBtn) {
-            currentPage += 1;
-        } else {
-            currentPage = parseInt(event.target.textContent) || 1;
-        }
-    
-        console.log(currentPage)
-        await startProducts(currentPage);
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-        });
+    const nextBtn = event.target.closest('.nextBtn');
+    let currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+
+    if (previousBtn) {
+        currentPage = Math.max(1, currentPage - 1);
+    } else if (nextBtn) {
+        currentPage += 1;
+    } else {
+        currentPage = parseInt(event.target.textContent) || 1;
+    }
+
+    await startProducts(currentPage);
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+    });
 }

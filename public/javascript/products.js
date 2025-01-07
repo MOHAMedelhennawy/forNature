@@ -114,7 +114,7 @@ const renderProducts = async (data) => {
         const productSummary = newItem.querySelector('.product-summery');
         const productPrice = newItem.querySelector('.price');
     
-        productImage.src = `images/${product.image}`;
+        productImage.src = `images/products/${product.image}`;
         productName.textContent = product.name;
         productSummary.textContent = product.summary;
         productPrice.textContent = roundTo(product.price, 3);

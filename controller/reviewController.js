@@ -16,9 +16,9 @@ export const addNewReview = async (req, res, next) => {
 
         if (!user && !user?.id) throw new Error('User is undefined');
 
-        const data = await createData('review', { user_id: user.id, product_id, review, rating });
+        const newReview = await createData('review', { user_id: user.id, product_id, review, rating });
 
-        res.status(200).json(data);
+        res.status(200).json({ newReview, user });
     } catch (error) {
         logger.error(error.message)
         next(error);

@@ -1,4 +1,4 @@
-import { fetchCategories } from '/javascript/api/category.js';
+import { fetchCategories } from '/javascript/api/apis.js';
 
 // dual range slider start
 function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
