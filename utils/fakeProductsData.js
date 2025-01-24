@@ -76,6 +76,7 @@ async function createFakeProduct(subCategoryId, categoryId) {
 
 async function generateFakeData() {
     console.log("Clearing existing data...");
+
     await prisma.product.deleteMany();
     await prisma.subCategory.deleteMany();
     await prisma.category.deleteMany();
@@ -104,6 +105,7 @@ async function generateFakeData() {
 
     console.log("Fake data created successfully!");
 }
+
 
 generateFakeData()
     .catch((e) => {

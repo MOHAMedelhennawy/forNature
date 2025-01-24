@@ -18,7 +18,7 @@ export const getAllItems = async (cart_id) => {
 
     try {
         const data = await prisma.CartItems.findMany({
-            where: {cart_id}
+            where: { cart_id }
         });
         return data;
     } catch(error) {

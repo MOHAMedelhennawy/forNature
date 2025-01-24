@@ -10,7 +10,8 @@ export function toggleCartButton(newItem, cartItemMap, productId) {
 
     if (!cartItemMap) return;
 
-    const cartItem = cartItemMap.get(productId);
+
+    const cartItem = cartItemMap.get(productId) || null;
 
     if (cartItem) {
         const quantityButton = newItem.querySelector('.quantity-btn');
@@ -21,6 +22,8 @@ export function toggleCartButton(newItem, cartItemMap, productId) {
         cartBtn.style.display = 'none';
         quantityButton.style.display = 'flex';
         currentQuantity.innerText = cartItem.quantity;
+    } else {
+        console.log(` Cart Doesn't exist`)
     }
 }
 

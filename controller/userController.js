@@ -14,7 +14,7 @@ export const getUserByIDController =  async (req, res, next) => {
     const id = req.params.id || null;
 
     if (!id || typeof id !== 'string' || !isValidUUID(id)) {
-        return res.status(400).json( {message: 'Invalid or missing ID' });
+        return res.status(400).json({ message: 'Invalid or missing ID' });
     }
 
     try {
@@ -49,8 +49,8 @@ export const getAllUsersController = async (req, res, next) => {
 
 export const addNewUserController = async (req, res, next) => {
     try {
-
         const hashedPassword = await hashPassword(req.body.password);
+
         if (!hashedPassword) {
             return res.status(404).json({ message: 'Failed to hash password'});
         }

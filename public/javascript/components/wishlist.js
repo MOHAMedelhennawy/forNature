@@ -6,8 +6,9 @@ import {
 export function toggleWishlistButton(newItem, wihslistMap, productId) {
 
     if (!wihslistMap) return;
-    const wishlistItem = wihslistMap.get(productId);
-    
+
+    const wishlistItem = wihslistMap.get(productId) || null;
+
     if (wishlistItem) {
         const favourateBtn = newItem.querySelector('.favorate-btn i');
         favourateBtn.style.color = 'red';

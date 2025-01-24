@@ -15,10 +15,12 @@ import {
 
 } from '/javascript/components/wishlist.js'
 
+let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', async function () {
     await startProducts();
     await renderFilter();
+    addEventListeners();
 });
 
 async function startProducts(page, limit, filters = {}) {
@@ -29,8 +31,8 @@ async function startProducts(page, limit, filters = {}) {
     const data = await fetchProducts(currentPage, currentLimit, filters);
 
     if (data && Array.isArray(data.products)) {
-        renderProducts(data);
-        addEventListeners(data.user);
+        currentUser = data.user;
+        await renderProducts(data);
     }
 }
 
@@ -83,9 +85,10 @@ async function fetchProducts(page, limit, filters = {}) {
  * @param {Object} data - Object of user data and products 
  */
 const renderProducts = async (data) => {
-    const productItem = document.querySelector('.product-item');
+    let cartItemMap, wishlistMap;
+    const productItemTemplate = document.querySelector('.product-item');
     const productGrid = document.querySelector('.product-grid');
-    productItem.style.display = 'none';
+    productItemTemplate.style.display = 'none';
     productGrid.innerHTML = '';
 
     // Create 10 item of skeleton element
@@ -96,7 +99,7 @@ const renderProducts = async (data) => {
 
     // Simulate longer loading time
     await new Promise(resolve => setTimeout(resolve, 3000));
-    let cartItemMap, wishlistMap;
+
     if (data.user) {
         [cartItemMap, wishlistMap] = await fetchCartAndWishlist();
     }
@@ -105,50 +108,78 @@ const renderProducts = async (data) => {
     productGrid.innerHTML = '';
 
     // Display products
-    for (const product of data.products) {
-        const newItem = productItem.cloneNode(true);
-        newItem.style.display = 'flex';
-    
-        const productImage = newItem.querySelector('.product-image');
-        const productName = newItem.querySelector('.product-name h3');
-        const productSummary = newItem.querySelector('.product-summery');
-        const productPrice = newItem.querySelector('.price');
-    
-        productImage.src = `images/products/${product.image}`;
-        productName.textContent = product.name;
-        productSummary.textContent = product.summary;
-        productPrice.textContent = roundTo(product.price, 3);
-        newItem.dataset.id = product.id;
-    
-        // Add event listener for redirect to each element
-        const redirectToProductPage = () => {
-            window.location.href = `/product/${product.id}`;
-        };
-    
-        productImage.addEventListener('click', redirectToProductPage);
-        productName.addEventListener('click', redirectToProductPage);
-        productSummary.addEventListener('click', redirectToProductPage);
-        productPrice.addEventListener('click', redirectToProductPage);
-    
-        if (data.user) {
-            toggleCartButton(newItem, cartItemMap, product.id);
-            toggleWishlistButton(newItem, wishlistMap, product.id);
-        }
-    
+    data.products.forEach(product => {
+        const newItem = createProductElement(product, cartItemMap, wishlistMap, data.user);
         productGrid.appendChild(newItem);
-        newItem.classList.remove('skeleton');
-        newItem.querySelectorAll('.skeleton').forEach(el => {
-            el.classList.remove('skeleton');
-            el.classList.remove('skeleton-text');
-        });
-    
-    }
+    });
 
     renderPaginationButtons(data.page, data.pages);
 };
 
+const createProductElement = (product, cartItemMap, wishlistMap, user) => {
+    const newItem = createProductTemplate(product);
+    newItem.style.display = 'flex';
+    newItem.dataset.id = product.id;
 
-async function addEventListeners(user) {
+    // Add click listeners for redirection
+    setupEventListeners(newItem, product.id);
+
+    if (user) {
+        toggleCartButton(newItem, cartItemMap, product.id);
+        toggleWishlistButton(newItem, wishlistMap, product.id);
+    }
+
+    newItem.classList.remove('skeleton');
+    newItem.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton', 'skeleton-text'));
+
+    return newItem;
+};
+
+
+function createProductTemplate(product) {
+    const newTemplate = document.createElement('div');
+    newTemplate.className = 'product-item';
+
+    newTemplate.innerHTML = `
+            <img class="product-image" src="images/products/${product.image}" alt="">
+
+            <div class="product-information">
+                <div class="product-name">
+                    <h3>${product.name}</h3>
+                </div>
+                <div class="product-rating">
+                    <span class="fa fa-star checked"></span>
+                    <span class="fa fa-star checked"></span>
+                    <span class="fa fa-star checked"></span>
+                    <span class="fa fa-star checked"></span>
+                    <span class="fa fa-star-half"></span>
+                </div>
+                <p class="product-summery">${product.summary}</p>
+                <div class="buttons">
+                    <div class="price">${roundTo(product.price, 3)}</div>
+                    <button class="cart-btn">Add to cart</button>
+                    <div class="quantity-btn">
+                        <button class="decrease-quantity"><i class='bx bx-minus'></i></button>
+                        <span class="quantity ">1</span>
+                        <button class="increase-quantity"><i class='bx bx-plus'></i></button>
+                    </div>
+                    <button class="favorate-btn"><i class="material-icons">favorite</i></button>
+                </div>
+            </div>
+        `
+    return newTemplate;
+}
+
+// Function to setup click event listeners
+const setupEventListeners = (element, productId) => {
+    const redirectToProductPage = () => window.location.href = `/product/${productId}`;
+
+    element.querySelectorAll('.product-image, .product-name h3, .product-summery, .price')
+        .forEach(el => el.addEventListener('click', redirectToProductPage));
+};
+
+
+async function addEventListeners() {
     
     // Use productGrid for event delegation to handle future dynamically added products
     const productGrid = document.querySelector('.product-grid');
@@ -164,11 +195,11 @@ async function addEventListeners(user) {
 
         // Handle adding product to cart, if user click on cartBtn
         if (cartBtn) {
-            await handleAction(user, () => handleCartButtonClick(cartBtn));
+            await handleAction(currentUser, async () => await handleCartButtonClick(cartBtn));
         } else if (quantityButton) {
-            await handleAction(user, () => handleQuantityButtonsClick(quantityButton));
+            await handleAction(currentUser, async () => await handleQuantityButtonsClick(quantityButton));
         } else if (favourateBtn) {
-            await handleAction(user, () => handleFavourateButtonClick(user.id, favourateBtn));
+            await handleAction(currentUser, async () => await handleFavourateButtonClick(currentUser.id, favourateBtn));
         }
     })
 
@@ -176,7 +207,7 @@ async function addEventListeners(user) {
         const previousBtn = event.target.closest('.previousBtn');
         const nextBtn = event.target.closest('.nextBtn');
         let currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
-    
+
         if (previousBtn) {
             currentPage = Math.max(1, currentPage - 1);
         } else if (nextBtn) {
@@ -184,8 +215,9 @@ async function addEventListeners(user) {
         } else {
             currentPage = parseInt(event.target.textContent) || 1;
         }
-    
+
         await startProducts(currentPage);
+
         window.scrollTo({
             top: 0,
             behavior: 'smooth',
@@ -203,8 +235,8 @@ async function addEventListeners(user) {
     })
 }
 
-async function handleAction(user, action) {
-    if (user) {
+async function handleAction(currentUser, action) {
+    if (currentUser) {
         await action();
     } else {
         console.error('Please login and try again');
