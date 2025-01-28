@@ -1,6 +1,6 @@
 # Furniture Website Project
 
-<!-- Uploading "07.01.2025_18.14.10_REC.mp4"... -->
+[<!-- Uploading "07.01.2025_18.14.10_REC.mp4"... -->](https://github.com/user-attachments/assets/9182251c-ef96-42bd-886f-2f0573c3a416)
 
 ---
 
