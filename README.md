@@ -1,5 +1,9 @@
 # Furniture Website Project
 
+<!-- Uploading "07.01.2025_18.14.10_REC.mp4"... -->
+
+---
+
 ## Project Overview
 This project is a furniture e-commerce website that enables users to browse, search, and purchase furniture. It includes features such as user authentication, product categorization, cart management, and wishlist functionality. The project is built using Node.js, Express.js, Prisma ORM, and a PostgreSQL database.
 
