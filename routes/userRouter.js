@@ -1,11 +1,13 @@
 import express from 'express';
 import { requireAuth } from '../middleware/authMWPermission.js';
 import {
+    addNewUserController,
     deleteUserByIDController,
     getAllUsersController,
     getUserByIDController,
     udpateUserByIDController
 } from '../controller/userController.js';
+import userValidator from '../validators/userValidator.js';
 
 const router = express.Router();
 
@@ -17,7 +19,7 @@ router.get('/:id', getUserByIDController)
 router.get('/', getAllUsersController);
 
 // POST => http://localhost:8000/user
-// router.post('/', userValidator, authPermission, addNewUserController);
+router.post('/', userValidator, addNewUserController);
 
 // PUT => http://localhost:8000/user
 router.put('/:id', requireAuth, udpateUserByIDController);

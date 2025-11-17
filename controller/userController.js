@@ -2,114 +2,114 @@ import logger from '../utils/logger.js';
 import { validate as isValidUUID } from 'uuid';
 import hashPassword from '../utils/passwordHashing.js';
 import { checkUsername, checkEmail, generateAuthToken } from '../services/authService.js'
-import {
-    createData,
-    deleteDataByID,
-    getAllData,
-    getDataByID,
-    updateDataByID
-} from '../services/dataService.js';
+import catchAsync from '../utils/handlers/catchAsync.js';
+import AppError from '../utils/handlers/AppError.js';
+import { createNewUserService, deleteUserByIdService, getAllUsersService, updateUserByIdService } from '../services/userService.js';
 
-export const getUserByIDController =  async (req, res, next) => {
+export const getUserByIDController =  catchAsync(async (req, res) => {
     const id = req.params.id || null;
 
     if (!id || typeof id !== 'string' || !isValidUUID(id)) {
-        return res.status(400).json({ message: 'Invalid or missing ID' });
+        throw new AppError('Invalid user ID', 400, 'Invalid user ID or cannot be empty', true);
     }
 
-    try {
-        const user = await getDataByID('user', id);
+    const user = await getUserWithIdService(id);
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.status(200).json(user);
-    } catch(error) {
-        next(error);
+    if (!user) {
+        throw new AppError(`User with id ${id} not found`, 404, 'user not found', true);
     }
-}
 
+    res.status(200).json(user);
+});
 
-export const getAllUsersController = async (req, res, next) => {
-    const limit = parseInt(req.query.limit) || 10;
+export const getAllUsersController = catchAsync(async (req, res) => {
+    const users = await getAllUsersService();
 
-    try {
-        const users = await getAllData('user', limit);
+    res.status(200).json(users);
+});
 
-        if(!users) {
-            return res.status(404).json({ message: 'No users found'});
-        }
+export const addNewUserController = catchAsync(async (req, res) => {
+    const hashedPassword = await hashPassword(req.body.password);
 
-        res.status(200).json(users);
-    } catch(error) {
-        next(error);
+    if (!hashedPassword) {
+        throw new AppError(
+            'Failed to hash password',
+            400,
+            'Failed to hash password',
+            false
+        );
     }
-}
 
-export const addNewUserController = async (req, res, next) => {
-    try {
-        const hashedPassword = await hashPassword(req.body.password);
+    const user = await createNewUserService({
+        ...req.body,
+        password: hashedPassword
+    });
 
-        if (!hashedPassword) {
-            return res.status(404).json({ message: 'Failed to hash password'});
-        }
-
-        const user = await createData('user', {
-            ...req.body,
-            password: hashedPassword
-        });
-
-        if (!user) {
-            return res.status(500).json({ message: `Failed to create user` } );
-        }
-
-        const maxAge = 12 * 60 * 60;
-        const token = generateAuthToken(user, maxAge);
-
-        res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
-
-        logger.info('User created successfully!')
-
-        res.status(201).json({
-            message: 'User created successfully!',
-            user
-        });
-    } catch(error) {
-        logger.error(error.message)
-        next(error);
+    if (!user) {
+        throw new AppError('Falied to create new user', 400, 'Failed to ceate new user', true);
     }
-}
 
-export const udpateUserByIDController = async (req, res, next) => {
+    const maxAge = 12 * 60 * 60;
+    const token = generateAuthToken(user, maxAge);
+
+    res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
+
+    logger.info('User created successfully!')
+
+    res.status(201).json({
+        message: 'User created successfully!',
+        user
+    });
+});
+
+export const udpateUserByIDController = catchAsync(async (req, res) => {
+    const data = req.body;
+    const id = req.params.id || null;
+
+    if (!id || typeof id !== 'string' || !isValidUUID(id)) {
+        throw new AppError('Invalid user ID', 400, 'Invalid user ID or cannot be empty', true);
+    }
+
+    if (!data || typeof data !== 'object') {
+        throw new AppError(
+            'User data is missing',
+            400,
+            "User data is missing",
+            true,
+        );
+    } 
+
+    const updatedUser = await updateUserByIdService(id, req.body);
+
+    if (!updatedUser) {
+        throw new AppError(
+            'Failed to update user data',
+            400,
+            'Failed to update user data',
+            false,
+        );
+    }
+
+    res.status(200).json(updatedUser);
+});
+
+export const deleteUserByIDController = catchAsync(async (req, res) => {
     const id = req.params.id;
 
-    try {
-        const updatedUser = await updateDataByID('user', id, req.body);
-
-        if (!updatedUser) {
-            return res.status(404).json({message: 'Usre not found'});
-        }
-
-        res.status(200).json(updatedUser);
-    } catch(error) {
-        next(error);
+    if (!id || typeof id !== 'string' || !isValidUUID(id)) {
+        throw new AppError('Invalid user ID', 400, 'Invalid user ID or cannot be empty', true);
     }
-}
 
+    const deletedUser = await deleteUserByIdService(id);
 
-export const deleteUserByIDController = async (req, res, next) => {
-    const id = req.params.id;
-
-    try {
-        const deletedUser = await deleteDataByID('user', id);
-
-        if (!deletedUser) {
-            return res.status(404).json({message: 'User not found'});
-        }
-
-        res.status(204).json({message: `User deleted successfully.`});
-    } catch(error) {
-        next(error);
+    if (!deletedUser) {
+        throw new AppError(
+            "Failed to delete user",
+            400,
+            "Failed to delete user",
+            true
+        );
     }
-}
+
+    res.status(204).json({message: `User deleted successfully.`});
+});

@@ -1,14 +1,11 @@
 import bcrypt from 'bcrypt';
+import catchAsync from "./handlers/catchAsync.js"
 
-const hashPassword = async (password) => {
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+const hashPassword = catchAsync(async (password) => {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-        return hashedPassword;
-    } catch (error) {
-        throw new Error('Error hashing the password');
-    }
-}
+    return hashedPassword;
+});
 
 export default hashPassword;

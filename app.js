@@ -47,7 +47,7 @@ app.get('/', (req, res, next) => res.render('home'));
 // API Routes
 app.use(authRouter);
 app.use('/admin', adminRouter);
-app.use('/api/v1/users', userRouter);
+app.use('/api/v1/users', userRouter);   // done
 app.use('/api/v1/products', productsRouter); // done
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/wishlist', wishlistRouter);
