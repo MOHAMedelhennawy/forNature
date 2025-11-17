@@ -17,10 +17,12 @@ const errorMiddleware = (err, req, res, next) => {
       });
     }
   
-    // Handle other types of errors
-    res.status(err.status || 500).json({
+    // Handle AppError and other types of errors
+    const statusCode = err.statusCode || err.status || 500;
+    res.status(statusCode).json({
       success: false,
-      message: err.message || 'An unexpected error occurred.'
+      message: err.message || 'An unexpected error occurred.',
+      ...(err.description && { description: err.description })
     });
 };
 

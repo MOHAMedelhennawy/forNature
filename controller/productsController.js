@@ -1,69 +1,88 @@
-import logger from '../utils/logger.js';
-import { createData, getAllData, getDataByID, getTotalItems } from '../services/dataService.js';
-import {getProductByID} from '../services/productService.js'
-import { getAllProductsData } from '../services/productService.js';
+import AppError from '../utils/handlers/AppError.js';
+import catchAsync from '../utils/handlers/catchAsync.js';
+import {getProductByID, getAllProductsData, createProduct} from '../services/productService.js';
 
-export const getAllProducts = async (req, res, next) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 28;
-        const categories = req.query.categories || null;
-        const subCategories = req.query.subCategories || null;
-        const minPrice = req.query.minPrice || null;
-        const maxPrice = req.query.maxPrice || null;
-        const user = res.locals.user || null;
-
-        const products = await getAllProductsData(page, limit, categories, subCategories, minPrice, maxPrice);
-        const totalItems = products.total;
-
-        res.status(200).json({
-            products: products.data,
-            user,
-            page,
-            limit,
-            totalItems,
-            pages: Math.ceil(totalItems / limit),
-
-        });
-
-
-    } catch (error) {
-        logger.error("Error fetching products:", error.message);
-        next(error);
+export const getAllProducts = catchAsync(async (req, res) => {
+    // Validate and parse page
+    let page = parseInt(req.query.page);
+    if (isNaN(page) || page < 1) {
+        page = 1;
     }
-};
 
-export const getProductById = async (req, res, next) => {
-    try {
-        const id = req.params.id || undefined;
-        const user = res.locals.user;
-        
-        if (!id)
-            res.status(404).json({ error: 'product id is missing'});
-
-        const product = await getProductByID(id, true);
-
-        res.status(200).json({ product, user });
-    } catch (error) {
-        next(error);
+    // Validate and parse limit with bounds
+    let limit = parseInt(req.query.limit);
+    if (isNaN(limit) || limit < 1) {
+        limit = 28;
     }
-}
-
-export const addNewProduct = async (req, res, next) => {
-    try {
-        req.body.image = req.file.filename;
-        req.body.price = parseFloat(req.body.price)
-        req.body.quantity = parseInt(req.body.quantity)
-        
-        const newProduct = await createData('product', req.body);
-        logger.info('Product added successfully!');
-        res.status(200).json({
-            message: 'Product added successfull!',
-            newProduct
-        })
-
-    } catch (error) {
-        logger.error(error.message)
-        next(error);
+    // Set maximum limit to prevent excessive data retrieval
+    const MAX_LIMIT = 100;
+    if (limit > MAX_LIMIT) {
+        limit = MAX_LIMIT;
     }
-}
+
+    // Parse and validate price filters
+    let minPrice = null;
+    if (req.query.minPrice) {
+        minPrice = parseFloat(req.query.minPrice);
+        if (isNaN(minPrice) || minPrice < 0) {
+            throw new AppError('Invalid minPrice', 400, 'minPrice must be a non-negative number', true);
+        }
+    }
+
+    let maxPrice = null;
+    if (req.query.maxPrice) {
+        maxPrice = parseFloat(req.query.maxPrice);
+        if (isNaN(maxPrice) || maxPrice < 0) {
+            throw new AppError('Invalid maxPrice', 400, 'maxPrice must be a non-negative number', true);
+        }
+    }
+
+    // Validate price range logic
+    if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+        throw new AppError('Invalid price range', 400, 'minPrice cannot be greater than maxPrice', true);
+    }
+
+    const categories = req.query.categories || null;
+    const subCategories = req.query.subCategories || null;
+    const user = res.locals.user || null;
+
+    const products = await getAllProductsData(page, limit, categories, subCategories, minPrice, maxPrice);
+    const totalItems = products.total;
+
+    res.status(200).json({
+        products: products.data,
+        user,
+        page,
+        limit,
+        totalItems,
+        pages: totalItems > 0 ? Math.ceil(totalItems / limit) : 0
+    });
+});
+
+export const getProductById = catchAsync(async (req, res) => {
+    const id = req.params?.id?.trim();
+    const user = res.locals.user;
+    
+    if (!id || id === '') {
+        throw new AppError('Product ID is required', 400, 'Product ID is required and cannot be empty', true);
+    }
+
+    const product = await getProductByID(id, true);
+
+    res.status(200).json({ product, user });
+});
+
+export const addNewProduct = catchAsync(async (req, res) => {
+    // Validate file upload (HTTP-specific, stays in controller)
+    if (!req.file) {
+        throw new AppError('Image file is required', 400, 'No image file was uploaded', true);
+    }
+
+    // Delegate business logic and validation to service
+    const newProduct = await createProduct(req.body, req.file.filename);
+
+    res.status(201).json({
+        message: 'Product added successfully!',
+        newProduct
+    });
+});
