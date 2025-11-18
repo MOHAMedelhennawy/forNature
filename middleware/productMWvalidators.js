@@ -2,25 +2,24 @@ import logger from '../utils/logger.js';
 import validateProduct from '../validators/prodcutVlidator.js';
 
 export const poductMWvalidator = async (req, res, next) => {
-    let errorsList = [];
-    const { isValid, errors } = await validateProduct(req.body);
+    let errors = [];
+    const validationResult = await validateProduct(req.body);
 
-    if (!isValid) {
-        errorsList.push(errors.map(error => ({
-                field: error.instancePath.replace('/', ''),
-                message: error.message,
+    if (validationResult !== true) {
+        errors.push(...validationResult.map(error => ({
+            field: error.instancePath.replace('/', ''),
+            message: error.message,
         })));
     }
 
-    if (errorsList.length > 0) {
-        console.log(errorsList)
+    if (errors.length > 0) {
         logger.error('Product Validation Error');
         return res.status(400).json({
             message: 'validation error',
-            errorsList
-        })
+            errors,
+        });
     }
 
     logger.info('Accepted Product');
-    next()
-}
+    next();
+};

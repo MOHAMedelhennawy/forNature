@@ -4,7 +4,7 @@ import hashPassword from '../utils/passwordHashing.js';
 import { checkUsername, checkEmail, generateAuthToken } from '../services/authService.js'
 import catchAsync from '../utils/handlers/catchAsync.js';
 import AppError from '../utils/handlers/AppError.js';
-import { createNewUserService, deleteUserByIdService, getAllUsersService, updateUserByIdService } from '../services/userService.js';
+import { createNewUserService, deleteUserByIdService, getAllUsersService, updateUserByIdService, getUserWithIdService } from '../services/userService.js';
 
 export const getUserByIDController =  catchAsync(async (req, res) => {
     const id = req.params.id || null;
@@ -34,7 +34,7 @@ export const addNewUserController = catchAsync(async (req, res) => {
     if (!hashedPassword) {
         throw new AppError(
             'Failed to hash password',
-            400,
+            500,
             'Failed to hash password',
             false
         );
@@ -46,7 +46,7 @@ export const addNewUserController = catchAsync(async (req, res) => {
     });
 
     if (!user) {
-        throw new AppError('Falied to create new user', 400, 'Failed to ceate new user', true);
+        throw new AppError('Failed to create new user', 400, 'Failed to create new user', true);
     }
 
     const maxAge = 12 * 60 * 60;
@@ -54,15 +54,13 @@ export const addNewUserController = catchAsync(async (req, res) => {
 
     res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
 
-    logger.info('User created successfully!')
-
     res.status(201).json({
         message: 'User created successfully!',
         user
     });
 });
 
-export const udpateUserByIDController = catchAsync(async (req, res) => {
+export const updateUserByIDController = catchAsync(async (req, res) => {
     const data = req.body;
     const id = req.params.id || null;
 
@@ -111,5 +109,5 @@ export const deleteUserByIDController = catchAsync(async (req, res) => {
         );
     }
 
-    res.status(204).json({message: `User deleted successfully.`});
+    res.status(204).send();
 });

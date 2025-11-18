@@ -6,8 +6,6 @@ import { addNewProduct, getAllProducts, getProductById } from "../controller/pro
 
 const router = express.Router();
 
-
-
 router.get('/', getAllProducts);
 router.get('/:id', getProductById)
 router.post('/', checkUser, checkAdmin, upload.single('image'), poductMWvalidator, addNewProduct);

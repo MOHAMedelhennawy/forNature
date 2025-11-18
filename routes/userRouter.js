@@ -5,26 +5,27 @@ import {
     deleteUserByIDController,
     getAllUsersController,
     getUserByIDController,
-    udpateUserByIDController
+    updateUserByIDController
 } from '../controller/userController.js';
-import userValidator from '../validators/userValidator.js';
+import { validateSchema } from '../middleware/validateSchema.js';
+import { SigninSchema, UpdateUserSchema } from '../middleware/schemas/auth.schema.js';
 
 const router = express.Router();
 
-// GET => http://localhost:8000/user/:id
-router.get('/:id', getUserByIDController)
-
-// GET => http://localhost:8000/user
-// GET => http://localhost:8000/user?limit=10
+// GET => http://localhost:8000/api/v1/users
+// GET => http://localhost:8000/api/v1/users?limit=10
 router.get('/', getAllUsersController);
 
-// POST => http://localhost:8000/user
-router.post('/', userValidator, addNewUserController);
+// GET => http://localhost:8000/api/v1/users/:id
+router.get('/:id', getUserByIDController);
 
-// PUT => http://localhost:8000/user
-router.put('/:id', requireAuth, udpateUserByIDController);
+// POST => http://localhost:8000/api/v1/users
+router.post('/', validateSchema(SigninSchema), addNewUserController);
 
-// DELETE => http://localhost:8000/user
+// PUT => http://localhost:8000/api/v1/users/:id
+router.put('/:id', requireAuth, validateSchema(UpdateUserSchema), updateUserByIDController);
+
+// DELETE => http://localhost:8000/api/v1/users/:id
 router.delete('/:id', requireAuth, deleteUserByIDController);
 
 // to clear all data

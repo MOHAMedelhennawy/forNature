@@ -1,4 +1,3 @@
-import { error } from 'console';
 import { getUserCart } from '../services/cartService.js';
 import { createData } from '../services/dataService.js';
 import logger from '../utils/logger.js';
