@@ -1,5 +1,6 @@
-import { getAllCartItemsService, changeCartItemQuantity } from "../services/cartItemsServices.js";
-import { createData, deleteDataByID, updateDataByID } from "../services/dataService.js";
+import { getAllCartItemsService, changeCartItemQuantity, addNewItemToCartService } from "../services/cartItemsServices.js";
+import { deleteDataByID, updateDataByID } from "../services/dataService.js";
+import AppError from "../utils/handlers/AppError.js";
 import catchAsync from "../utils/handlers/catchAsync.js";
 import logger from "../utils/logger.js";
 
@@ -35,33 +36,23 @@ export const getAllCartItems = catchAsync(async (req, res, next) => {
     logger.info(`Retrieved ${allCartItems?.length || 0} items from cart ${cart.id} for user ${user.id}`);
 });
 
-export const addNewItemToCart = async (req, res, next) => {
-    try {
-        const cart = res.locals.cart;
-        const { productId, price } = req.body;
+export const addNewItemToCart = catchAsync(async (req, res, next) => {
+    const cart = res.locals.cart;
+    const { productId, price } = req.body;
 
-        if (!productId || !price) {
-            throw new Error("Product ID or price is missing.");
-        }
-
-        const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
-        
-        const newItem = await createData('cartItem', {
-            cart_id: cart.id,
-            product_id: productId,
-            quantity: 1
-        });
-
-        await updateDataByID('cart', cart.id, { total_cost: totalCost });
-
-        logger.info(`Cart item added successfully with product ID: ${productId}`);
-        res.status(201).json(newItem);
-    } catch (error) {
-        logger.error(`Error adding item to cart: ${error.message}`);
-        next(error);
+    if (!productId || !price) {
+        throw new AppError("Product ID or price is missing.", 404);
     }
-};
 
+    const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
+
+    const newItem = await addNewItemToCartService(productId, cart.id);
+
+    await updateDataByID('cart', cart.id, { total_cost: totalCost });
+
+    logger.info(`Cart item added successfully with product ID: ${productId}`);
+    res.status(201).json(newItem);
+});
 
 export const updateCartItem = async (req, res, next) => {
     try {

@@ -11,7 +11,8 @@
     "start": "node server",
     "start:dev": "nodemon server",
     "migrate": "npx prisma migrate dev",
-    "test": "jest"
+    "test": "jest",
+    "tes": "echo i love serag"
   },
   "keywords": [],
   "author": "",

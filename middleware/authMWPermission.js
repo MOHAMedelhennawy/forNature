@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import logger from '../utils/logger.js';
 import { getDataByID } from '../services/dataService.js';
+import catchAsync from '../utils/handlers/catchAsync.js';
 
 // Promisify jwt.verify for better async/await support
 const verifyToken = promisify(jwt.verify);
@@ -112,39 +113,31 @@ export const requireAuth = async (req, res, next) => {
  * 2. Only fetching when specific fields are needed
  * 3. Using JWT payload directly if you only need user ID
  */
-export const checkUser = async (req, res, next) => {
-    try {
-        const token = extractToken(req);
+export const checkUser = catchAsync(async (req, res, next) => {
+    const token = extractToken(req);
 
-        if (!token) {
-            logger.debug('No authentication token provided');
-            res.locals.user = null;
-            return next();
-        }
-
-        const decodedToken = await verifyJwtToken(token);
-        
-        // Fetch full user data from database
-        // This ensures user still exists and has current permissions (e.g., isAdmin)
-        const user = await getDataByID('user', decodedToken.userid);
-        
-        if (!user) {
-            logger.warn('User not found in database', { userId: decodedToken.userid });
-            res.locals.user = null;
-            return next();
-        }
-
-        res.locals.user = user;
-        logger.info('User authenticated', { userId: decodedToken.userid });
-        next();
-    } catch (error) {
-        // For optional auth, log error but continue
-        logger.error('Token verification failed in checkUser', { error: error.message });
+    if (!token) {
+        logger.debug('No authentication token provided');
         res.locals.user = null;
-        next();
+        return next();
     }
-};
 
+    const decodedToken = await verifyJwtToken(token);
+    
+    // Fetch full user data from database
+    // This ensures user still exists and has current permissions (e.g., isAdmin)
+    const user = await getDataByID('user', decodedToken.userid);
+    
+    if (!user) {
+        logger.warn('User not found in database', { userId: decodedToken.userid });
+        res.locals.user = null;
+        return next();
+    }
+
+    res.locals.user = user;
+    logger.info('User authenticated', { userId: decodedToken.userid });
+    next();
+});
 
 export const checkAdmin = async (req, res, next) => {
     const user = res.locals.user;

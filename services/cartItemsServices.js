@@ -15,6 +15,18 @@ export const getAllCartItemsService = handlePrismaQuery(async (cart_id) => {
     return data;
 });
 
+export const addNewItemToCartService = handlePrismaQuery(async (product_id, cart_id) => {
+    const data = await prisma.cartItems.create({
+        data: {
+            product_id,
+            cart_id,
+            quantity: 1,
+        }
+    });
+
+    return data;
+});
+
 export const changeCartItemQuantity = handlePrismaQuery(async (id, quantity) => {
     if (!quantity) {
         throw new AppError("Quantity", 400, "Quantity", flase);
