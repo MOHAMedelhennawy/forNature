@@ -1,8 +1,7 @@
 import logger from "../utils/logger.js";
 import { deleteAllOrderItemsByOrderID, getOrderWithUserInformation } from "../services/orderService.js";
 import { createData, deleteDataByID, getAllData, getDataByID, updateDataByID } from "../services/dataService.js";
-import { getAllItems } from "../services/cartService.js";
-
+import { getAllCartItemsService } from "../services/cartItemsServices.js";
 
 export const getOrderById = async (req, res, next) => {
     try {
@@ -45,7 +44,7 @@ export const addNewOrder = async (req, res, next) => {
             return res.status(400).json({ message });
         }
         
-        const items = await getAllItems(cart.id);
+        const items = await getAllCartItemsService(cart.id);
         if (!items || items.length === 0) {
             const message = 'Items data is required.';
             logger.error(message);

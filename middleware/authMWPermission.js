@@ -1,65 +1,149 @@
 import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
 import logger from '../utils/logger.js';
 import { getDataByID } from '../services/dataService.js';
 
-export const requireAuth = (req, res, next) => {
-    const token = req.cookies.authToken || null;
-    
-    // Check if this is an API request (starts with /api/)
-    const isApiRequest = req.path.startsWith('/api/') || req.originalUrl.startsWith('/api/');
+// Promisify jwt.verify for better async/await support
+const verifyToken = promisify(jwt.verify);
 
-    if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, (error, decodedToken) => {
-            if (error) {
-                logger.error(error.message);
-                if (isApiRequest) {
-                    return res.status(401).json({ 
-                        message: 'Authentication failed',
-                        error: 'Invalid or expired token'
-                    });
-                }
-                return res.redirect('/login');
-            } else {
-                logger.info(decodedToken);
-                // Attach user info to request for later use
-                req.user = decodedToken;
-                next();
-            }
-        })
-    } else {
-        if (isApiRequest) {
-            return res.status(401).json({ 
-                message: 'Authentication required',
-                error: 'No authentication token provided'
-            });
-        }
-        return res.redirect('/login');
+/**
+ * Check if the request is an API request
+ * @param {Object} req - Express request object
+ * @returns {boolean}
+ */
+const isApiRequest = (req) => {
+    return req.path.startsWith('/api/') || req.originalUrl.startsWith('/api/');
+};
+
+/**
+ * Send authentication error response based on request type
+ * @param {Object} res - Express response object
+ * @param {Object} req - Express request object
+ * @param {string} message - Error message
+ * @param {string} error - Detailed error description
+ * @param {number} statusCode - HTTP status code (default: 401)
+ */
+const sendAuthError = (res, req, message, error, statusCode = 401) => {
+    if (isApiRequest(req)) {
+        return res.status(statusCode).json({ message, error });
     }
-}
+    return res.redirect('/login');
+};
 
-// Check the current user to access from front-end
+/**
+ * Extract token from request (supports both Bearer token and cookies)
+ * Priority: Authorization header > Cookie
+ * @param {Object} req - Express request object
+ * @returns {string|null} Token string or null if not found
+ */
+const extractToken = (req) => {
+    // Check Authorization header first (Bearer token)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        return authHeader.substring(7); // Remove 'Bearer ' prefix
+    }
+    
+    // Fall back to cookie
+    return req.cookies.authToken || null;
+};
+
+/**
+ * Verify JWT token and return decoded token
+ * @param {string} token - JWT token to verify
+ * @returns {Promise<Object>} Decoded token
+ * @throws {Error} If token is invalid or expired
+ */
+const verifyJwtToken = async (token) => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not configured');
+    }
+    return await verifyToken(token, process.env.JWT_SECRET);
+};
+
+/**
+ * Middleware to require authentication
+ * Supports both Bearer tokens (for API) and cookies (for web)
+ * Attaches decoded token to req.user
+ */
+export const requireAuth = async (req, res, next) => {
+    try {
+        const token = extractToken(req);
+
+        if (!token) {
+            return sendAuthError(
+                res,
+                req,
+                'Authentication required',
+                'No authentication token provided. Use Authorization: Bearer <token> header or authToken cookie'
+            );
+        }
+
+        const decodedToken = await verifyJwtToken(token);
+        logger.info('Token verified successfully', { userId: decodedToken.userid });
+        
+        // Attach user info to request for later use
+        req.user = decodedToken;
+        next();
+    } catch (error) {
+        logger.error('Authentication failed', { error: error.message });
+        return sendAuthError(
+            res,
+            req,
+            'Authentication failed',
+            'Invalid or expired token'
+        );
+    }
+};
+
+/**
+ * Middleware to optionally check user authentication
+ * Supports both Bearer tokens and cookies
+ * Attaches user object to res.locals.user (null if not authenticated)
+ * Used for front-end rendering where authentication is optional
+ * 
+ * NOTE: Fetches user from database to ensure:
+ * - User still exists (not deleted)
+ * - User data is fresh (e.g., isAdmin status)
+ * - Full user object available for controllers
+ * 
+ * Performance consideration: This adds a DB query per request.
+ * If performance is critical, consider:
+ * 1. Caching user data with short TTL (e.g., Redis, 5-15 min)
+ * 2. Only fetching when specific fields are needed
+ * 3. Using JWT payload directly if you only need user ID
+ */
 export const checkUser = async (req, res, next) => {
-    const token = req.cookies.authToken;
+    try {
+        const token = extractToken(req);
 
-    if (token) {    // if user is login
-        jwt.verify(token, process.env.JWT_SECRET, async (error, decodedToken) => {
-            if (error) {
-                logger.error(error.message);
-                res.locals.user = null;
-                next()
-            } else {
-                const user = await getDataByID('user', decodedToken.userid);
-                res.locals.user = user;
-                logger.info(`token is verified, user id is ${decodedToken.userid}`);
-                next();
-            }
-        })
-    } else {    // if user not login
-        logger.warn('User is not login');
+        if (!token) {
+            logger.debug('No authentication token provided');
+            res.locals.user = null;
+            return next();
+        }
+
+        const decodedToken = await verifyJwtToken(token);
+        
+        // Fetch full user data from database
+        // This ensures user still exists and has current permissions (e.g., isAdmin)
+        const user = await getDataByID('user', decodedToken.userid);
+        
+        if (!user) {
+            logger.warn('User not found in database', { userId: decodedToken.userid });
+            res.locals.user = null;
+            return next();
+        }
+
+        res.locals.user = user;
+        logger.info('User authenticated', { userId: decodedToken.userid });
+        next();
+    } catch (error) {
+        // For optional auth, log error but continue
+        logger.error('Token verification failed in checkUser', { error: error.message });
         res.locals.user = null;
         next();
     }
-}
+};
 
 
 export const checkAdmin = async (req, res, next) => {

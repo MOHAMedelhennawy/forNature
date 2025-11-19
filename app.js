@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter.js';
 import authRouter from './routes/authRouter.js';
 import cartRouter from './routes/cartRouter.js';
+import cartItemRouter from './routes/catrItemsRouter.js'
 import reviewRouter from './routes/reviewRouter.js';
 import adminRouter from './routes/adminRouter.js'
 import orderRouter from './routes/orderRouter.js';
@@ -49,11 +50,12 @@ app.use(authRouter);
 app.use('/admin', adminRouter);
 app.use('/api/v1/users', userRouter);   // done
 app.use('/api/v1/products', productsRouter); // done
-app.use('/api/v1/cart', cartRouter);
-app.use('/api/v1/wishlist', wishlistRouter);
-app.use('/api/v1/order', orderRouter);
-app.use('/api/v1/category', categoryRouter);
-app.use('/api/v1/review', reviewRouter);
+app.use('/api/v1/cart', checkUser, cartRouter); // done
+app.use('/api/v1/cart/item', cartItemRouter);
+// app.use('/api/v1/wishlist', wishlistRouter);
+// app.use('/api/v1/order', orderRouter);
+// app.use('/api/v1/category', categoryRouter);
+// app.use('/api/v1/review', reviewRouter);
 
 app.use(errorMiddleware);
 

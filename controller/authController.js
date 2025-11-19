@@ -36,7 +36,12 @@ export const login_post = async (req, res, next) => {
 
         res.cookie('authToken', token, { httpOnly: true, maxAge: maxAge * 1000});
         logger.info('User logging successfully!')
-        res.status(201).json({ message: 'Login successful', user });
+        // Return token in response body for API clients (e.g., Postman)
+        res.status(201).json({ 
+            message: 'Login successful', 
+            user,
+            token // Include token for API usage
+        });
     } catch (error) {
         logger.error(`Login failed: ${error.message}`);
         next(error)

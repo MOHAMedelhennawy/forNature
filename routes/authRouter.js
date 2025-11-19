@@ -22,7 +22,7 @@ router.post('/signup', validateSchema(SigninSchema), addNewUserController);
 
 router.get('/login', login_get)
 
-router.post('/login', /*validateSchema(loginSchema),*/ login_post)
+router.post('/login', authMWValidator, login_post)
 
 router.get('/logout', logout)
 

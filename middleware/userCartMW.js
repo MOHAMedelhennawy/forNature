@@ -1,4 +1,4 @@
-import { getUserCart } from '../services/cartService.js';
+import { getUserCartService } from '../services/cartService.js';
 import { createData } from '../services/dataService.js';
 import logger from '../utils/logger.js';
 
