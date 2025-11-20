@@ -1,12 +1,12 @@
-import { getAllCartItemsService, changeCartItemQuantity, addNewItemToCartService } from "../services/cartItemsServices.js";
+import { getAllCartItemsService, changeCartItemQuantityService, addNewItemToCartService, getCartItemByIDService } from "../services/cartItemsServices.js";
+import { updateCartTotalCostService } from "../services/cartService.js";
 import { deleteDataByID, updateDataByID } from "../services/dataService.js";
 import AppError from "../utils/handlers/AppError.js";
 import catchAsync from "../utils/handlers/catchAsync.js";
 import logger from "../utils/logger.js";
 
 export const getAllCartItems = catchAsync(async (req, res, next) => {
-    const cart = res.locals.cart;
-    const user = res.locals.user;
+    const { cart, user } = res.locals;
 
     // Handle non-authenticated users
     if (!user) {
@@ -37,54 +37,61 @@ export const getAllCartItems = catchAsync(async (req, res, next) => {
 });
 
 export const addNewItemToCart = catchAsync(async (req, res, next) => {
-    const cart = res.locals.cart;
+    const { cart } = res.locals;
     const { productId, price } = req.body;
+    
+    const missing = [];
+    if (!productId) missing.push('productId');
+    if (price == null) missing.push('price');
 
-    if (!productId || !price) {
-        throw new AppError("Product ID or price is missing.", 404);
+    if (missing.length) {
+        throw new AppError(
+            `Missing required field${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}. Please include ${missing.length > 1 ? 'them' : 'it'} in the request body.`,
+            400
+        );
     }
-
+    
+    const newItem = await addNewItemToCartService(productId, cart.id);
     const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
 
-    const newItem = await addNewItemToCartService(productId, cart.id);
-
-    await updateDataByID('cart', cart.id, { total_cost: totalCost });
+    await updateCartTotalCostService(cart.id, totalCost);
 
     logger.info(`Cart item added successfully with product ID: ${productId}`);
     res.status(201).json(newItem);
 });
 
-export const updateCartItem = async (req, res, next) => {
-    try {
-        const cartItemId = req.params.id;
-        const { quantity, price } = req.body;
-        const cart = res.locals.cart;
+export const updateCartItemQuantity = catchAsync(async (req, res, next) => {
+    const cartItemId = req.params.id;
+    const { quantity } = req.body;
+    const { cart } = res.locals;
 
-        if (!quantity || !price) {
-            throw new Error("Quantity or price is missing.");
-        }
-
-        const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
-
-        const updatedItem = await changeCartItemQuantity(cartItemId, quantity);
-
-        if (updatedItem) {
-            await updateDataByID('cart', cart.id, { total_cost: totalCost });
-            res.status(200).json({ updatedItem, cart });
-            logger.info(`Cart item with ID ${cartItemId} updated successfully`);
-        } else {
-            return next(new Error('Failed to update cart item'));
-        }
-    } catch (error) {
-        logger.error(`Error updating cart item: ${error.message}`);
-        next(error);
+    if (!quantity || quantity <= 0) {
+        throw new AppError("Quantity must be at least 1.", 400, "Missing Data", false);
     }
-};
 
+    if (!cart) {    
+        throw new AppError("Cart not found.", 404, "Cart Not Found", false);
+    }
 
-export const deleteCartItem = async (req, res, next) => {
-    try {
-        const cartItemId = req.params.id;
+    const item = await changeCartItemQuantityService(cartItemId, quantity);
+    if (!item) {
+        throw new AppError("Cart item not found.", 404, "Item Not Found", false);
+    }
+
+    const cartItems = await getAllCartItemsService(cart.id);
+    let totalCost = 0;
+    for (const cartItem of cartItems) {
+        totalCost += parseFloat(cartItem.quantity) * parseFloat(cartItem.product.price);
+    }
+
+    await updateCartTotalCostService(cart.id, totalCost);
+
+    res.status(200).json(item);
+    logger.info(`Cart item with ID ${cartItemId} updated successfully`);
+});
+
+export const deleteCartItem = catchAsync(async (req, res, next) => {
+    const cartItemId = req.params.id;
         const cart = res.locals.cart;
         const itemPrice = parseFloat(req.body.price);
 
@@ -103,8 +110,5 @@ export const deleteCartItem = async (req, res, next) => {
         } else {
             return next(new Error('Failed to delete cart item'));
         }
-    } catch (error) {
-        logger.error(`Error deleting cart item: ${error.message}`);
-        next(error);
-    }
-};
+});
+

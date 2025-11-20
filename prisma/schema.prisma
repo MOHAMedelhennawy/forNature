@@ -126,7 +126,8 @@ model CartItems {
   id                String        @id @default(uuid())
   cart_id           String
   product_id        String
-  quantity          Int           
+  quantity          Int
+  total_cost        Int 
   cart              Cart          @relation(fields: [cart_id], references: [id])
   product           Product       @relation(fields: [product_id], references: [id])
 

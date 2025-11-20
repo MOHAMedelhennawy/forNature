@@ -17,7 +17,16 @@ export const createUserCartService = handlePrismaQuery(async (user) => {
     });
 
     return data;
-})
+});
+
+export const updateCartTotalCostService = handlePrismaQuery(async (cartId, newTotalCost) => {
+    const data = await prisma.cart.update({
+        where: { id: cartId },
+        data: { total_cost: newTotalCost },
+    });
+
+    return data;
+});
 
 export const deleteUserCartService = handlePrismaQuery(async (user) => {
 

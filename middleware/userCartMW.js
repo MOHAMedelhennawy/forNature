@@ -8,7 +8,6 @@ export const checkUserCart = catchAsync(async (req, res, next) => {
     if (!user) return next()
 
     const userCart = await getUserCartService(user);
-    console.log(userCart)
     if (userCart) {
         res.locals.cart = userCart;
         logger.info(`User with ID ${user.id} has an existing cart.`);
@@ -21,10 +20,9 @@ export const checkUserCart = catchAsync(async (req, res, next) => {
 });
 
 export const createUserCart = catchAsync(async (req, res, next) => {
-    const user = res.locals.user;
-    const userCart = res.locals.cart;
+    const { user, cart } = res.locals;
 
-    if (!userCart) {
+    if (!cart) {
         const newCart = await createUserCartService(user);
         res.locals.cart = newCart;
         logger.info('User cart created successfully');

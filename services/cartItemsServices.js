@@ -7,6 +7,21 @@ const prisma = new PrismaClient();
 // get all cart items
 // delete items from cart
 // update item from cart
+export const getCartItemByIDService = handlePrismaQuery(async (id) => {
+    const data = await prisma.cartItems.findUnique({
+        where: { id },
+        include: { 
+            product: {
+                select: {
+                    price: true,
+                }
+            }
+        }
+    });
+
+    return data;
+});
+
 export const getAllCartItemsService = handlePrismaQuery(async (cart_id) => {
     const data = await prisma.cartItems.findMany({
         where: { cart_id }
@@ -27,15 +42,18 @@ export const addNewItemToCartService = handlePrismaQuery(async (product_id, cart
     return data;
 });
 
-export const changeCartItemQuantity = handlePrismaQuery(async (id, quantity) => {
-    if (!quantity) {
-        throw new AppError("Quantity", 400, "Quantity", flase);
-    }
-
-    return await prisma.cartItems.update({
+export const changeCartItemQuantityService = handlePrismaQuery(async (id, quantity) => {
+   return await prisma.cartItems.update({
         where: {id: id},
         data: {
             quantity
+        },
+       include: { 
+            product: {
+                select: {
+                    price: true,
+                }
+            }
         }
     })
 });
