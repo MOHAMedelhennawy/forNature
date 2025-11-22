@@ -1,4 +1,4 @@
-import { getAllCartItemsService, changeCartItemQuantityService, addNewItemToCartService, getCartItemByIDService } from "../services/cartItemsServices.js";
+import { getAllCartItemsService, updateCartItemQuantityService, addNewItemToCartService, getCartItemByIDService, getCartTotalCostService, deleteCartItemByIDService } from "../services/cartItemsServices.js";
 import { updateCartTotalCostService } from "../services/cartService.js";
 import { deleteDataByID, updateDataByID } from "../services/dataService.js";
 import AppError from "../utils/handlers/AppError.js";
@@ -51,7 +51,7 @@ export const addNewItemToCart = catchAsync(async (req, res, next) => {
         );
     }
     
-    const newItem = await addNewItemToCartService(productId, cart.id);
+    const newItem = await addNewItemToCartService(productId, cart.id, price);
     const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
 
     await updateCartTotalCostService(cart.id, totalCost);
@@ -69,46 +69,64 @@ export const updateCartItemQuantity = catchAsync(async (req, res, next) => {
         throw new AppError("Quantity must be at least 1.", 400, "Missing Data", false);
     }
 
-    if (!cart) {    
+    if (!cart) {
         throw new AppError("Cart not found.", 404, "Cart Not Found", false);
     }
 
-    const item = await changeCartItemQuantityService(cartItemId, quantity);
-    if (!item) {
-        throw new AppError("Cart item not found.", 404, "Item Not Found", false);
+    if (!cartItemId) {
+        throw new AppError("Cart item id is missing.", 400, "Missing id", false);
     }
 
-    const cartItems = await getAllCartItemsService(cart.id);
-    let totalCost = 0;
-    for (const cartItem of cartItems) {
-        totalCost += parseFloat(cartItem.quantity) * parseFloat(cartItem.product.price);
+    const existingItem = await getCartItemByIDService(cartItemId);
+    if (!existingItem || existingItem.cart_id !== cart.id) {
+        throw new AppError("Cart item not found.", 404, "Cart item not found", false);
     }
 
-    await updateCartTotalCostService(cart.id, totalCost);
+    // Update cartItem
+    const newTotalCost = quantity * existingItem.product.price;
+    const updatedItem = await updateCartItemQuantityService(cartItemId, parseInt(quantity), newTotalCost);
 
-    res.status(200).json(item);
+    // Get total_price
+    const { _sum } = await getCartTotalCostService(cart.id);
+
+    // Update cart
+    await updateCartTotalCostService(cart.id, _sum);
     logger.info(`Cart item with ID ${cartItemId} updated successfully`);
+
+    res.status(200).json(updatedItem);
 });
 
-export const deleteCartItem = catchAsync(async (req, res, next) => {
+export const deleteCartItemController = catchAsync(async (req, res, next) => {
+    const { cart } = res.locals;
     const cartItemId = req.params.id;
-        const cart = res.locals.cart;
-        const itemPrice = parseFloat(req.body.price);
 
-        if (!itemPrice) {
-            throw new Error("Item price is missing.");
-        }
+    if (!cart) {
+        throw new AppError("Cart not found.", 404, "Cart Not Found", false);
+    }
 
-        const totalCost = parseFloat(cart.total_cost) - itemPrice;
+    if (!cartItemId) {
+        throw new AppError("Cart item id is missing.", 400, "Missing id", false);
+    }
 
-        const deletedCartItem = await deleteDataByID('cartItem', cartItemId);
+    const existingItem = await getCartItemByIDService(cartItemId);
+    if (!existingItem || existingItem.cart_id !== cart.id) {
+        throw new AppError("Cart item not found.", 404, "Cart item not found", false);
+    }
 
-        if (deletedCartItem) {
-            await updateDataByID('cart', cart.id, { total_cost: totalCost });
-            res.status(204).json({ message: 'Cart item deleted successfully' });
-            logger.info(`Cart item with ID ${cartItemId} deleted successfully`);
-        } else {
-            return next(new Error('Failed to delete cart item'));
-        }
+    const deletedCartItem = await deleteCartItemByIDService(cartItemId);
+
+    const { _sum } = await getCartTotalCostService(cart.id);
+    const total = _sum.total_price || 0;
+
+    await updateCartTotalCostService(cart.id, total);
+
+    logger.info(`Cart item with ID ${cartItemId} deleted successfully`);
+
+    res.status(200).json({
+        message: "Item deleted successfully",
+        deletedItem: deletedCartItem,
+        total
+    });
+
 });
 

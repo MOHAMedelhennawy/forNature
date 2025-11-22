@@ -1,12 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { handlePrismaQuery } from '../utils/handlers/handlePrismaQuery.js';
-import AppError from '../utils/handlers/AppError.js';
 
 const prisma = new PrismaClient();
 
-// get all cart items
-// delete items from cart
-// update item from cart
 export const getCartItemByIDService = handlePrismaQuery(async (id) => {
     const data = await prisma.cartItems.findUnique({
         where: { id },
@@ -18,7 +14,7 @@ export const getCartItemByIDService = handlePrismaQuery(async (id) => {
             }
         }
     });
-
+    
     return data;
 });
 
@@ -30,11 +26,19 @@ export const getAllCartItemsService = handlePrismaQuery(async (cart_id) => {
     return data;
 });
 
-export const addNewItemToCartService = handlePrismaQuery(async (product_id, cart_id) => {
+export const getCartTotalCostService = handlePrismaQuery(async (cart_id) => {
+    return await prisma.cartItems.aggregate({
+        where: { cart_id },
+        _sum: { total_price: true },
+    });
+});
+
+export const addNewItemToCartService = handlePrismaQuery(async (product_id, cart_id, price) => {
     const data = await prisma.cartItems.create({
         data: {
             product_id,
             cart_id,
+            total_price: price,
             quantity: 1,
         }
     });
@@ -42,25 +46,25 @@ export const addNewItemToCartService = handlePrismaQuery(async (product_id, cart
     return data;
 });
 
-export const changeCartItemQuantityService = handlePrismaQuery(async (id, quantity) => {
+export const updateCartItemQuantityService = handlePrismaQuery(async (id, quantity, total_price) => {
    return await prisma.cartItems.update({
         where: {id: id},
         data: {
-            quantity
+            quantity,
+            total_price,
         },
-       include: { 
-            product: {
-                select: {
-                    price: true,
-                }
-            }
-        }
     })
 });
 
-export const deleteAllCartItemsByCartID = handlePrismaQuery(async (cart_id) => {
-    if (!cart_id) throw new Error('Id is missing');
-    
+export const deleteCartItemByIDService = handlePrismaQuery(async (id) => {
+    return await prisma.cartItems.delete({
+        where: {
+            id,
+        }
+    });
+});
+
+export const deleteAllCartItemsByCartIDService = handlePrismaQuery(async (cart_id) => {
     return await prisma.cartItems.deleteMany({
         where: {
             cart_id

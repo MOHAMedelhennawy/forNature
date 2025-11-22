@@ -51,7 +51,7 @@ app.use('/admin', adminRouter);
 app.use('/api/v1/users', userRouter);   // done
 app.use('/api/v1/products', productsRouter); // done
 app.use('/api/v1/cart', checkUser, cartRouter); // done
-app.use('/api/v1/cart/item', cartItemRouter);
+app.use('/api/v1/cart/item', checkUser, checkUserCart, cartItemRouter); 
 // app.use('/api/v1/wishlist', wishlistRouter);
 // app.use('/api/v1/order', orderRouter);
 // app.use('/api/v1/category', categoryRouter);
