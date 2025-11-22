@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'
 import logger from "../utils/logger.js";
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient()
+import { prisma } from '../utils/prismaClient.js';
 
 export const checkUsername = async (username) => {
     try {

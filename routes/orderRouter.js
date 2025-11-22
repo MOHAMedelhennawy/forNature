@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/:id', getOrderById);
 router.get('/', getOrders);
 router.post('/', requireAuth, checkUser, checkUserCart, addNewOrder, addOrderItems, deleteCart)
-
 router.delete('/:id', checkUser, checkAdmin, deleteOrder);
-router.patch('/:id/status', checkUser, checkAdmin, updateOrderStatus)
+router.patch('/:id/status', checkUser, checkAdmin, updateOrderStatus);
+
 export default router;

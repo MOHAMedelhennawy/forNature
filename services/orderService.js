@@ -1,46 +1,54 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prismaClient.js';
 import logger from '../utils/logger.js';
+import { handlePrismaQuery } from '../utils/handlers/handlePrismaQuery.js';
 
-const prisma = new PrismaClient();
 
-export const getOrderWithUserInformation = async (id) => {
-    try {
-        if (!id) throw new Error(`Order id is missing`);
-
-        return await prisma.Order.findUnique({
-            where: {
-                id
-            },
-            include: {
-                user: true,
-                orderItems: {
-                    include:{
-                        product: {
-                            include: {
-                                category: true,
-                                subCategory: true
-                            }
-                        },
-                    }
+export const getOrderWithUserInformation = handlePrismaQuery(async (id) => {
+    return await prisma.Order.findUnique({
+        where: {
+            id
+        },
+        include: {
+            user: true,
+            orderItems: {
+                include:{
+                    product: {
+                        include: {
+                            category: true,
+                            subCategory: true
+                        }
+                    },
                 }
             }
-        })
-    } catch (error) {
-        logger.error(`Failed to get order: ${error.message}`);
-        throw new Error(`Failed to get order: ${error.message}`);
-    }
-}
+        }
+    })
+});
 
-export const deleteAllOrderItemsByOrderID = async (order_id) => {
-    try {
-        if (!order_id) throw new Error(`Order id is missing`)
-        
-        return await prisma.OrderItems.deleteMany({
-            where: {
-                order_id
-            }
-        });
-    } catch (error) {
-        throw new Error(`Failed to delete cart items: ${error.message}`);
-    }
-}
+export const getAllOrdersService = handlePrismaQuery(async () => {
+    return await prisma.Order.findMany({});
+});
+
+export const createOrderService = handlePrismaQuery(async (user_id, total_cost) => {
+    return await prisma.Order.create({
+        data: {
+            user_id,
+            total_cost,
+        }
+    });
+});
+
+export const deleteAllOrderItemsByOrderIDService = handlePrismaQuery(async (order_id) => {    
+    return await prisma.OrderItems.deleteMany({
+        where: {
+            order_id
+        }
+    });
+});
+
+export const deleteDataByIDService = handlePrismaQuery(async (id) => {
+    return await prisma.Order.delete({
+        where: {
+            id
+        }
+    });
+});

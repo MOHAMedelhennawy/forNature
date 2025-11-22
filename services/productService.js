@@ -1,10 +1,8 @@
 import logger from '../utils/logger.js';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prismaClient.js';
 import AppError from '../utils/handlers/AppError.js';
 import { buildProductIncludeClause, validateProductId } from '../utils/productHelpers.js';
 import { handlePrismaQuery } from '../utils/handlers/handlePrismaQuery.js';
-
-const prisma = new PrismaClient()
 
 export const getAllProductsData = handlePrismaQuery(async (page, limit, categoryQuery, subCategoryQuery, minPrice, maxPrice) => {
     // Build pagination options

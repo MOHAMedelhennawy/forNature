@@ -1,22 +1,39 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prismaClient.js';
 import { handlePrismaQuery } from '../utils/handlers/handlePrismaQuery.js';
+import AppError from '../utils/handlers/AppError.js';
 
-const prisma = new PrismaClient();
-
-export const getUserCartService = handlePrismaQuery(async (user) => {
+export const getUserCartService = handlePrismaQuery(async (userId) => {
     const data = await prisma.cart.findUnique({
-        where: { user_id: user.id }
+        where: { user_id: userId }
     });
 
     return data;
 });
 
 export const createUserCartService = handlePrismaQuery(async (user) => {
-    const data = await prisma.cart.create({
-        data: { user_id: user.id },
-    });
+    const cart = await prisma.cart.$transaction(async (tx) => {
+        const existingCart = await tx.cart.findUnique({
+            where: { user_id: user.id }
+        });
 
-    return data;
+        if (existingCart) {
+            throw new AppError(
+                'Cart already exists for this user',
+                400,
+                'Create Cart Error',
+                false
+            );
+        }
+
+        const newCart = await tx.cart.create({
+            data: {
+                user_id: user.id,
+                total_cost: 0
+            }
+        });
+
+        return newCart;
+    })
 });
 
 export const updateCartTotalCostService = handlePrismaQuery(async (cartId, _sum) => {
@@ -31,9 +48,30 @@ export const updateCartTotalCostService = handlePrismaQuery(async (cartId, _sum)
 });
 
 export const deleteUserCartService = handlePrismaQuery(async (user) => {
-    const data = await prisma.cart.delete({
-        where: { user_id: user.id },
+    const deletedCart = await prisma.cart.$transaction(async (tx) => {
+        const cart = await tx.cart.findUnique({
+            where: { user_id: user.id }
+        });
+
+        if (!cart) {
+            throw new AppError(
+                'Cart not found for this user',
+                404,
+                'Delete Cart Error',
+                false
+            );
+        }
+        
+        const deletedCartItems = await tx.cartItem.deleteMany({
+            where: { cart_id: cart.id }
+        });
+
+        const deletedCart = await tx.cart.delete({
+            where: { id: cart.id }
+        });
+
+        return deletedCart;
     });
 
-    return data;
+    return deletedCart; 
 });

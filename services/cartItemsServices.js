@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prismaClient.js';
 import { handlePrismaQuery } from '../utils/handlers/handlePrismaQuery.js';
-
-const prisma = new PrismaClient();
 
 export const getCartItemByIDService = handlePrismaQuery(async (id) => {
     const data = await prisma.cartItems.findUnique({

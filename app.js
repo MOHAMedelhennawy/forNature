@@ -1,8 +1,10 @@
+// External Imports
 import cors from 'cors';
 import dotenv from 'dotenv'
 import helmet from 'helmet';
 import express from 'express';
 import cookieParser from 'cookie-parser';
+// Routes Imports
 import userRouter from './routes/userRouter.js';
 import authRouter from './routes/authRouter.js';
 import cartRouter from './routes/cartRouter.js';
@@ -13,6 +15,7 @@ import orderRouter from './routes/orderRouter.js';
 import categoryRouter from './routes/categoryRouter.js';
 import wishlistRouter from './routes/wishlistRoutes.js';
 import productsRouter from './routes/productsRouter.js'
+// Middleware Imports
 import errorMiddleware from './middleware/errorMW.js';
 import { checkUser, requireAuth } from './middleware/authMWPermission.js';
 import { checkUserCart } from './middleware/userCartMW.js';
@@ -50,10 +53,10 @@ app.use(authRouter);
 app.use('/admin', adminRouter);
 app.use('/api/v1/users', userRouter);   // done
 app.use('/api/v1/products', productsRouter); // done
-app.use('/api/v1/cart', checkUser, cartRouter); // done
-app.use('/api/v1/cart/item', checkUser, checkUserCart, cartItemRouter); 
+app.use('/api/v1/cart', checkUser, requireAuth, cartRouter); // done
+app.use('/api/v1/cart/item', checkUser, requireAuth, checkUserCart, cartItemRouter); // done
+app.use('/api/v1/order', orderRouter);
 // app.use('/api/v1/wishlist', wishlistRouter);
-// app.use('/api/v1/order', orderRouter);
 // app.use('/api/v1/category', categoryRouter);
 // app.use('/api/v1/review', reviewRouter);
 

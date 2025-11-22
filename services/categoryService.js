@@ -1,8 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prismaClient.js';
 import logger from "../utils/logger.js";
-
-
-const prisma = new PrismaClient();
 
 export const getCategoryAndSubCatgeory = async (id, name) => {
     try {

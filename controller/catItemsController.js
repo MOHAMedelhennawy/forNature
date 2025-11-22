@@ -1,6 +1,5 @@
 import { getAllCartItemsService, updateCartItemQuantityService, addNewItemToCartService, getCartItemByIDService, getCartTotalCostService, deleteCartItemByIDService } from "../services/cartItemsServices.js";
 import { updateCartTotalCostService } from "../services/cartService.js";
-import { deleteDataByID, updateDataByID } from "../services/dataService.js";
 import AppError from "../utils/handlers/AppError.js";
 import catchAsync from "../utils/handlers/catchAsync.js";
 import logger from "../utils/logger.js";

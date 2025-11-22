@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../utils/prismaClient.js';
 
 export const getWishlistItemsByUserId = async (user_id) => {
 
