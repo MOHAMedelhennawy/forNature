@@ -53,7 +53,7 @@ app.use(authRouter);
 app.use('/admin', adminRouter);
 app.use('/api/v1/users', userRouter);   // done
 app.use('/api/v1/products', productsRouter); // done
-app.use('/api/v1/cart', checkUser, requireAuth, cartRouter); // done
+app.use('/api/v1/cart', cartRouter); // done
 app.use('/api/v1/cart/item', checkUser, requireAuth, checkUserCart, cartItemRouter); // done
 app.use('/api/v1/order', orderRouter);
 // app.use('/api/v1/wishlist', wishlistRouter);

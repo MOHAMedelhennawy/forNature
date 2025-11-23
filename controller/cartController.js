@@ -7,16 +7,15 @@ export const getCartByUserIDController = catchAsync(async (req, res) => {
 
     const cart = await getUserCartService(user.id);
 
-    logger.info(`Cart fetched for user ID: ${user.id}`);
-    res.status(200).json({
-        cart: cart || null
-    });
+    logger.debug('Cart retrieved', { userId: user.id, cartId: cart?.id });
+    res.status(200).json({ cart });
 });
 
 export const createNewCartController = catchAsync(async (req, res) => {
     const { user } = res.locals;
 
-    const cart = await createUserCartService(user);
+    const cart = await createUserCartService(user.id);
+    logger.info('Cart created', { userId: user.id, cartId: cart.id });
 
     res.status(201).json({
         message: "Cart created successfully",
@@ -27,7 +26,8 @@ export const createNewCartController = catchAsync(async (req, res) => {
 export const deleteCart = catchAsync(async (req, res) => {
     const { user } = res.locals;
 
-    await deleteUserCartService(user);
+    await deleteUserCartService(user.id);
+    logger.info('Cart deleted', { userId: user.id });
 
     res.status(204).send();
 });

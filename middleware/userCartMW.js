@@ -7,7 +7,7 @@ export const checkUserCart = catchAsync(async (req, res, next) => {
     
     if (!user) return next()
 
-    const userCart = await getUserCartService(user);
+    const userCart = await getUserCartService(user.id);
     if (userCart) {
         res.locals.cart = userCart;
         logger.info(`User with ID ${user.id} has an existing cart.`);

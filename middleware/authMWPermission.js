@@ -3,6 +3,8 @@ import { promisify } from 'util';
 import logger from '../utils/logger.js';
 import { getDataByID } from '../services/dataService.js';
 import catchAsync from '../utils/handlers/catchAsync.js';
+import { getUserWithIdService } from '../services/userService.js';
+import AppError from '../utils/handlers/AppError.js';
 
 // Promisify jwt.verify for better async/await support
 const verifyToken = promisify(jwt.verify);
@@ -61,11 +63,88 @@ const verifyJwtToken = async (token) => {
     return await verifyToken(token, process.env.JWT_SECRET);
 };
 
-/**
- * Middleware to require authentication
- * Supports both Bearer tokens (for API) and cookies (for web)
- * Attaches decoded token to req.user
- */
+export const authenticate = catchAsync(async (req, res, next) => {
+    const token = extractToken(req);
+
+    if (!token) {
+        logger.debug('No authentication token provided');
+        return res.status(401).json({
+            error: 'Authentication required',
+            message: 'Please provide a valid authentication token'
+        });
+    }
+
+    const decodedToken = await verifyJwtToken(token);
+    const user = await getUserWithIdService(decodedToken.userid);
+
+    if (!user) {
+        logger.warn('Token valid but user not found', { userId: decodedToken.userid });
+        throw new AppError(
+            "User account not found",
+            401,
+            "Authentication failed",
+            true
+        )
+    }
+
+    // Make user available to controllers
+    req.user = user;
+    res.locals.user = user;
+    
+    logger.debug('Authentication successful', { userId: user.id });
+    next();
+});
+
+export const optionalAuth = catchAsync(async (req, res, next) => {
+    const token = extractToken(req);
+
+    if (!token) {
+        req.user = null;
+        res.locals.user = null;
+        return next();
+    }
+
+    try {
+        const decodedToken = await verifyJwtToken(token);
+        const user = await getDataByID('user', decodedToken.userid);
+        
+        req.user = user || null;
+        res.locals.user = user || null;
+    } catch (error) {
+        logger.debug('Optional auth failed', { error: error.message });
+        req.user = null;
+        res.locals.user = null;
+    }
+    
+    next();
+});
+
+export const checkUser = catchAsync(async (req, res, next) => {
+    const token = extractToken(req);
+
+    if (!token) {
+        logger.debug('No authentication token provided');
+        res.locals.user = null;
+        return next();
+    }
+
+    const decodedToken = await verifyJwtToken(token);
+    
+    // Fetch full user data from database
+    // This ensures user still exists and has current permissions (e.g., isAdmin)
+    const user = await getDataByID('user', decodedToken.userid);
+    
+    if (!user) {
+        logger.warn('User not found in database', { userId: decodedToken.userid });
+        res.locals.user = null;
+        return next();
+    }
+
+    res.locals.user = user;
+    logger.info('User authenticated', { userId: decodedToken.userid });
+    next();
+});
+
 export const requireAuth = async (req, res, next) => {
     try {
         const token = extractToken(req);
@@ -95,49 +174,6 @@ export const requireAuth = async (req, res, next) => {
         );
     }
 };
-
-/**
- * Middleware to optionally check user authentication
- * Supports both Bearer tokens and cookies
- * Attaches user object to res.locals.user (null if not authenticated)
- * Used for front-end rendering where authentication is optional
- * 
- * NOTE: Fetches user from database to ensure:
- * - User still exists (not deleted)
- * - User data is fresh (e.g., isAdmin status)
- * - Full user object available for controllers
- * 
- * Performance consideration: This adds a DB query per request.
- * If performance is critical, consider:
- * 1. Caching user data with short TTL (e.g., Redis, 5-15 min)
- * 2. Only fetching when specific fields are needed
- * 3. Using JWT payload directly if you only need user ID
- */
-export const checkUser = catchAsync(async (req, res, next) => {
-    const token = extractToken(req);
-
-    if (!token) {
-        logger.debug('No authentication token provided');
-        res.locals.user = null;
-        return next();
-    }
-
-    const decodedToken = await verifyJwtToken(token);
-    
-    // Fetch full user data from database
-    // This ensures user still exists and has current permissions (e.g., isAdmin)
-    const user = await getDataByID('user', decodedToken.userid);
-    
-    if (!user) {
-        logger.warn('User not found in database', { userId: decodedToken.userid });
-        res.locals.user = null;
-        return next();
-    }
-
-    res.locals.user = user;
-    logger.info('User authenticated', { userId: decodedToken.userid });
-    next();
-});
 
 export const checkAdmin = async (req, res, next) => {
     const user = res.locals.user;

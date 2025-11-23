@@ -37,19 +37,23 @@ export const getAllCartItems = catchAsync(async (req, res, next) => {
 
 export const addNewItemToCart = catchAsync(async (req, res, next) => {
     const { cart } = res.locals;
-    const { productId, price } = req.body;
+    const { productId } = req.body;
     
-    const missing = [];
-    if (!productId) missing.push('productId');
-    if (price == null) missing.push('price');
-
-    if (missing.length) {
+    if (!cart) {
         throw new AppError(
-            `Missing required field${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}. Please include ${missing.length > 1 ? 'them' : 'it'} in the request body.`,
-            400
+            "User cart is missing",
+            404,
+            "User cart not found",
+        )
+    }
+    if (!productId) {
+        throw new AppError(
+            "Porduct id is missing",
+            400,
+            "Missing id",
+            false,
         );
     }
-    
     const newItem = await addNewItemToCartService(productId, cart.id, price);
     const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
 
