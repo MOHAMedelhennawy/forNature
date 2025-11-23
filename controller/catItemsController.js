@@ -1,19 +1,21 @@
-import { getAllCartItemsService, updateCartItemQuantityService, addNewItemToCartService, getCartItemByIDService, getCartTotalCostService, deleteCartItemByIDService } from "../services/cartItemsServices.js";
+import {
+    getAllCartItemsService,
+    updateCartItemQuantityService,
+    addNewItemToCartService,
+    getCartItemByIDService,
+    getCartTotalCostService,
+    deleteCartItemByIDService,
+    addItemAndUpdateCartService,
+    updateCartItemQuantityFullService
+} from "../services/cartItemsServices.js";
 import { updateCartTotalCostService } from "../services/cartService.js";
+import { getProductByID } from "../services/productService.js";
 import AppError from "../utils/handlers/AppError.js";
 import catchAsync from "../utils/handlers/catchAsync.js";
 import logger from "../utils/logger.js";
 
 export const getAllCartItems = catchAsync(async (req, res, next) => {
     const { cart, user } = res.locals;
-
-    // Handle non-authenticated users
-    if (!user) {
-        return res.status(200).json({
-            message: 'User not authenticated',
-            items: [],
-        });
-    }
 
     // Handle case when cart doesn't exist
     if (!cart || !cart.id) {
@@ -43,9 +45,10 @@ export const addNewItemToCart = catchAsync(async (req, res, next) => {
         throw new AppError(
             "User cart is missing",
             404,
-            "User cart not found",
+            "User cart not found"
         )
     }
+
     if (!productId) {
         throw new AppError(
             "Porduct id is missing",
@@ -54,10 +57,13 @@ export const addNewItemToCart = catchAsync(async (req, res, next) => {
             false,
         );
     }
-    const newItem = await addNewItemToCartService(productId, cart.id, price);
-    const totalCost = parseFloat(cart.total_cost) + parseFloat(price);
 
-    await updateCartTotalCostService(cart.id, totalCost);
+    const existingProduct = await getProductByID(productId);
+    if (!existingProduct) {
+        throw new AppError("Product not found.", 404, "Product not found", false);
+    }
+
+    const newItem = await addItemAndUpdateCartService(productId, cart.id, existingProduct.price);
 
     logger.info(`Cart item added successfully with product ID: ${productId}`);
     res.status(201).json(newItem);
@@ -82,18 +88,16 @@ export const updateCartItemQuantity = catchAsync(async (req, res, next) => {
 
     const existingItem = await getCartItemByIDService(cartItemId);
     if (!existingItem || existingItem.cart_id !== cart.id) {
-        throw new AppError("Cart item not found.", 404, "Cart item not found", false);
+        throw new AppError("Cart item not found.", 404, "Cart item not found", true);
     }
+    
+    const updatedItem = await updateCartItemQuantityFullService(
+        cartItemId,
+        cart.id,
+        parseInt(quantity),
+        existingItem.product.price
+    );
 
-    // Update cartItem
-    const newTotalCost = quantity * existingItem.product.price;
-    const updatedItem = await updateCartItemQuantityService(cartItemId, parseInt(quantity), newTotalCost);
-
-    // Get total_price
-    const { _sum } = await getCartTotalCostService(cart.id);
-
-    // Update cart
-    await updateCartTotalCostService(cart.id, _sum);
     logger.info(`Cart item with ID ${cartItemId} updated successfully`);
 
     res.status(200).json(updatedItem);

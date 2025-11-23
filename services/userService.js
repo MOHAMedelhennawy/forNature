@@ -1,6 +1,7 @@
 import { prisma } from '../utils/prismaClient.js';
 import { handlePrismaQuery } from "../utils/handlers/handlePrismaQuery.js";
 import AppError from "../utils/handlers/AppError.js";
+import logger from '../utils/logger.js';
 
 export const getUserWithIdService = handlePrismaQuery(async (id) => {
     const data = await prisma.user.findUnique({

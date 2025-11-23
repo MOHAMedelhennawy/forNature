@@ -36,6 +36,7 @@ export const addNewItemToCartService = handlePrismaQuery(async (product_id, cart
         data: {
             product_id,
             cart_id,
+            unit_price: price,
             total_price: price,
             quantity: 1,
         }
@@ -69,3 +70,65 @@ export const deleteAllCartItemsByCartIDService = handlePrismaQuery(async (cart_i
         }
     });
 });
+
+export const addItemAndUpdateCartService = handlePrismaQuery(
+    async (productId, cartId, price) => {
+        return await prisma.$transaction(async (tx) => {
+            
+            // 1) Add new item
+            const newItem = await tx.cartItems.create({
+                data: {
+                    product_id: productId,
+                    cart_id: cartId,
+                    unit_price: price,
+                    total_price: price,
+                    quantity: 1,
+                },
+            });
+
+            // 2) Update cart total_cost
+            await tx.cart.update({
+                where: { id: cartId },
+                data: {
+                    total_cost: {
+                        increment: price,
+                    },
+                },
+            });
+
+            return newItem;
+        });
+    }
+);
+
+export const updateCartItemQuantityFullService = handlePrismaQuery(
+    async (cartItemId, cartId, quantity, price) => {
+        return await prisma.$transaction(async (tx) => {
+
+            // 1) Update cart item + its total
+            const updatedItem = await tx.cartItems.update({
+                where: { id: cartItemId },
+                data: {
+                    quantity,
+                    total_price: quantity * price
+                }
+            });
+
+            // 2) Get new SUM inside transaction
+            const { _sum } = await tx.cartItems.aggregate({
+                where: { cart_id: cartId },
+                _sum: { total_price: true }
+            });
+
+            // 3) Update cart total
+            await tx.cart.update({
+                where: { id: cartId },
+                data: {
+                    total_cost: _sum.total_price || 0
+                }
+            });
+
+            return updatedItem;
+        });
+    }
+);

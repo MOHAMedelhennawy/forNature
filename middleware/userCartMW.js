@@ -24,6 +24,7 @@ export const createUserCart = catchAsync(async (req, res, next) => {
 
     if (!cart) {
         const newCart = await createUserCartService(user);
+        console.log(newCart)
         res.locals.cart = newCart;
         logger.info('User cart created successfully');
     }
