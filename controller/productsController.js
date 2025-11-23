@@ -73,13 +73,36 @@ export const getProductById = catchAsync(async (req, res) => {
 });
 
 export const addNewProduct = catchAsync(async (req, res) => {
+    const productData = req.body;
+    const imageFilename = req.file?.filename;
+
     // Validate file upload (HTTP-specific, stays in controller)
-    if (!req.file) {
+    if (!imageFilename) {
         throw new AppError('Image file is required', 400, 'No image file was uploaded', true);
     }
 
+    // Validate and convert price
+    const price = parseFloat(productData.price);
+    if (isNaN(price) || price <= 0) {
+        throw new AppError('Invalid price', 400, 'Price must be a positive number', true);
+    }
+
+    // Validate and convert quantity
+    const quantity = parseInt(productData.quantity);
+    if (isNaN(quantity) || quantity < 0) {
+        throw new AppError('Invalid quantity', 400, 'Quantity must be a non-negative integer', true);
+    }
+
+    // Prepare product data for database
+    const preparedData = {
+        ...productData,
+        image: imageFilename,
+        price: price,
+        quantity: quantity,
+    };
+
     // Delegate business logic and validation to service
-    const newProduct = await createProduct(req.body, req.file.filename);
+    const newProduct = await createProduct(preparedData, imageFilename);
 
     res.status(201).json({
         message: 'Product added successfully!',

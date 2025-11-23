@@ -6,7 +6,8 @@ import {
     getCartTotalCostService,
     deleteCartItemByIDService,
     addItemAndUpdateCartService,
-    updateCartItemQuantityFullService
+    updateCartItemQuantityFullService,
+    deleteCartItemFullService
 } from "../services/cartItemsServices.js";
 import { updateCartTotalCostService } from "../services/cartService.js";
 import { getProductByID } from "../services/productService.js";
@@ -85,11 +86,6 @@ export const updateCartItemQuantity = catchAsync(async (req, res, next) => {
     if (!cartItemId) {
         throw new AppError("Cart item id is missing.", 400, "Missing id", false);
     }
-
-    const existingItem = await getCartItemByIDService(cartItemId);
-    if (!existingItem || existingItem.cart_id !== cart.id) {
-        throw new AppError("Cart item not found.", 404, "Cart item not found", true);
-    }
     
     const updatedItem = await updateCartItemQuantityFullService(
         cartItemId,
@@ -115,23 +111,13 @@ export const deleteCartItemController = catchAsync(async (req, res, next) => {
         throw new AppError("Cart item id is missing.", 400, "Missing id", false);
     }
 
-    const existingItem = await getCartItemByIDService(cartItemId);
-    if (!existingItem || existingItem.cart_id !== cart.id) {
-        throw new AppError("Cart item not found.", 404, "Cart item not found", false);
-    }
-
-    const deletedCartItem = await deleteCartItemByIDService(cartItemId);
-
-    const { _sum } = await getCartTotalCostService(cart.id);
-    const total = _sum.total_price || 0;
-
-    await updateCartTotalCostService(cart.id, total);
+    const { deletedItem, total } = await deleteCartItemFullService(cartItemId, cart.id);
 
     logger.info(`Cart item with ID ${cartItemId} deleted successfully`);
 
     res.status(200).json({
         message: "Item deleted successfully",
-        deletedItem: deletedCartItem,
+        deletedItem,
         total
     });
 

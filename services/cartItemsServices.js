@@ -104,8 +104,20 @@ export const addItemAndUpdateCartService = handlePrismaQuery(
 export const updateCartItemQuantityFullService = handlePrismaQuery(
     async (cartItemId, cartId, quantity, price) => {
         return await prisma.$transaction(async (tx) => {
+            const existingItem = await tx.cartItems.findUnique({
+                where: { id: cartItemId }
+            });
 
-            // 1) Update cart item + its total
+            if (!existingItem || existingItem.cart_id !== cartId) {
+                throw new AppError(
+                    "Cart item not found.",
+                    404,
+                    "Cart item not found",
+                    false
+                );
+            }
+    
+            // Update cart item + its total
             const updatedItem = await tx.cartItems.update({
                 where: { id: cartItemId },
                 data: {
@@ -114,13 +126,13 @@ export const updateCartItemQuantityFullService = handlePrismaQuery(
                 }
             });
 
-            // 2) Get new SUM inside transaction
+            // Get new SUM inside transaction
             const { _sum } = await tx.cartItems.aggregate({
                 where: { cart_id: cartId },
                 _sum: { total_price: true }
             });
 
-            // 3) Update cart total
+            // Update cart total
             await tx.cart.update({
                 where: { id: cartId },
                 data: {
@@ -132,3 +144,49 @@ export const updateCartItemQuantityFullService = handlePrismaQuery(
         });
     }
 );
+
+export const deleteCartItemFullService = handlePrismaQuery(
+    async (cartItemId, cartId) => {
+        return await prisma.$transaction(async (tx) => {
+            
+            // 1) Get cart item to delete
+            const existingItem = await tx.cartItems.findUnique({
+                where: { id: cartItemId }
+            });
+
+            if (!existingItem || existingItem.cart_id !== cart.id) {
+                throw new AppError("Cart item not found.",
+                    404,
+                    "Cart item not found",
+                    false
+                );
+            }
+
+            if (existingItem.cart_id !== cartId) {
+                throw new AppError(
+                    "Cart item does not belong to the specified cart.",
+                    400,
+                    "Invalid Cart Item",
+                    false
+                );
+            }
+            
+            const deletedItem = await tx.cartItems.delete({
+                where: { id: cartItemId }
+            });
+
+            const cartTotalCost = await tx.cartItems.aggregate({
+                where: { cart_id: existingItem.cart_id },
+                _sum: { total_price: true }
+            });
+
+            await tx.cart.update({
+                where: { id: existingItem.cart_id },
+                data: {
+                    total_cost: cartTotalCost._sum.total_price || 0
+                }
+            });
+
+            return {deletedItem, total: cartTotalCost._sum.total_price || 0};
+        });
+});

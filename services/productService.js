@@ -96,29 +96,11 @@ export const getProductByID = handlePrismaQuery(async (id, includeDetails = fals
  * @returns {Promise<Object>} Created product
  * @throws {AppError} If validation fails
  */
-export const createProduct = handlePrismaQuery(async (productData, imageFilename) => {
-    // Validate and convert price
-    const price = parseFloat(productData.price);
-    if (isNaN(price) || price <= 0) {
-        throw new AppError('Invalid price', 400, 'Price must be a positive number', true);
-    }
-
-    // Validate and convert quantity
-    const quantity = parseInt(productData.quantity);
-    if (isNaN(quantity) || quantity < 0) {
-        throw new AppError('Invalid quantity', 400, 'Quantity must be a non-negative integer', true);
-    }
-
-    // Prepare product data for database
-    const preparedData = {
-        ...productData,
-        image: imageFilename,
-        price: price,
-        quantity: quantity,
-    };
-
+export const createProduct = handlePrismaQuery(async (productData) => {
     const newProduct = await prisma.Product.create({
-        data: preparedData
+        data: {
+            ...productData,
+        }
     });
 
     logger.info('Product created successfully');
